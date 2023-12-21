@@ -7,7 +7,14 @@ async function bootstrap() {
     cors: true,
     logger: console,
   });
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
+
   await app.listen(3000);
 }
+
 bootstrap();
