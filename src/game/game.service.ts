@@ -3,6 +3,7 @@ import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { GameSession } from './models/game.model';
+import { GameType } from './interface/game.interface';
 
 @Injectable()
 export class GameService {
@@ -23,14 +24,14 @@ export class GameService {
   }
 
   async findOneUser(id: string) {
-    return { name: 'fake' };
+    return { name: 'fake name' };
   }
 
-  async update(id: string, updateGameDto: UpdateGameDto) {
+  async update(id: string, updateGameDto?: UpdateGameDto) {
     const existingGame = await this.gameSession.findByPk(id);
     if (existingGame) {
-      if (updateGameDto.guess_player_id)
-        existingGame.guess_player_id = updateGameDto.guess_player_id;
+      if (updateGameDto?.guess_player_id)
+        existingGame.guess_player_id = updateGameDto?.guess_player_id;
       else {
         existingGame.home_player_score = updateGameDto?.home_player_score;
         existingGame.guess_player_score = updateGameDto?.guess_player_score;
@@ -38,7 +39,7 @@ export class GameService {
         existingGame.number_of_rounds = updateGameDto?.number_of_rounds;
       }
 
-      return (await existingGame.save()).id;
+      return (await existingGame.save()).toJSON();
     }
 
     return `This action updates a #${id} game`;
@@ -47,4 +48,6 @@ export class GameService {
   remove(id: number) {
     return `This action removes a #${id} game`;
   }
+
+  async handleGameData(data: GameType) {}
 }

@@ -7,12 +7,9 @@ import {
   // CreatedAt,
   // UpdatedAt,
   // DeletedAt,
-  HasMany,
   BelongsTo,
 } from 'sequelize-typescript';
 import { GameSession } from 'src/game/models/game.model';
-import { Message } from 'src/messages/models/message.model';
-import { Option } from 'src/options/models/option.model';
 
 @Table({ timestamps: true, tableName: 'gamesession', freezeTableName: true })
 export class GameRound extends Model {
@@ -26,29 +23,20 @@ export class GameRound extends Model {
 
   @ForeignKey(() => GameSession)
   @Column({ type: DataType.UUID })
-  gamesessionId: string;
+  gamesession_id: string;
 
   @BelongsTo(() => GameSession)
   game: GameSession;
 
-  @HasMany(() => Message)
-  message: Message[];
-
-  @HasMany(() => Option)
-  options: Option[];
+  @Column
+  proposals: string;
 
   @Column
-  roundNumber: number;
+  round_number: number;
 
-  // @Column
-  // @CreatedAt
-  // creationDate: Date;
+  @Column
+  number_of_proposals: number;
 
-  // @Column
-  // @UpdatedAt
-  // updatedOn: Date;
-
-  // @Column
-  // @DeletedAt
-  // deletionDate: Date;
+  @Column
+  category: string;
 }

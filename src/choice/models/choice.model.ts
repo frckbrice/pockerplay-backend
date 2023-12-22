@@ -6,7 +6,7 @@ import {
   ForeignKey,
   BelongsTo,
 } from 'sequelize-typescript';
-import { Option } from 'src/options/models/option.model';
+import { GameRound } from 'src/game_round/models/game_round.model';
 
 import User from 'src/users/models/user.model';
 
@@ -20,24 +20,36 @@ export class Choice extends Model {
   })
   id: string;
 
+  @ForeignKey(() => GameRound)
+  @Column({ type: DataType.UUID })
+  round_id: string;
+
   @ForeignKey(() => User)
   @Column({ type: DataType.UUID })
-  player_id: string;
+  home_player_id: string;
+
+  @ForeignKey(() => User)
+  @Column({ type: DataType.UUID })
+  guess_player_id: string;
+
+  @Column
+  home_player_choice: string;
+
+  @Column
+  guess_player_choice: string;
+
+  @Column
+  proposals: string;
+
+  @Column
+  home_message_hint: string;
+
+  @Column
+  guess_message_hint: string;
 
   @BelongsTo(() => User)
   user: User;
 
-  @ForeignKey(() => Option)
-  @Column({ type: DataType.UUID })
-  option_id: string;
-
-  @BelongsTo(() => Option)
-  option: Option;
-
-  @Column
-  choice_made: string;
-
-  // @Column
-  // @CreatedAt
-  // selectAt: Date;
+  @BelongsTo(() => GameRound)
+  round: GameRound;
 }

@@ -11,6 +11,7 @@ import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { Socket, Server } from 'socket.io';
+import { GameType } from './interface/game.interface';
 
 @WebSocketGateway()
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -27,16 +28,23 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('init')
-  async create(@MessageBody() createGameDto: CreateGameDto) {
+  async create(
+    @MessageBody() createGameDto: CreateGameDto,
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.join(createGameDto.home_player_id);
     return await this.gameService.create(createGameDto);
   }
 
-  @SubscribeMessage('join_game')
-  handleJoinGame(
+  @SubscribeMessage('newgame')
+  async handleJoinGame(
     @MessageBody() data: { [value: string]: string },
     @ConnectedSocket() client: Socket,
   ) {
     client.join(data.gameSession);
+    await this.gameService.update(data.gameSession, {
+      guess_player_id: data.player,
+    });
     this.server
       .to(data.gameSession)
       .emit('notify', `🟢 ${data.player} is connected`);
@@ -59,12 +67,15 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   // @SubscribeMessage('updateGame')
-  // update(@MessageBody() updateGameDto: UpdateGameDto) {
-  //   return this.gameService.update(updateGameDto., updateGameDto);
-  // }
-
-  @SubscribeMessage('removeGame')
-  remove(@MessageBody() id: number) {
-    return this.gameService.remove(id);
+  async update(@MessageBody() updateGameDto: UpdateGameDto) {
+    return await this.gameService.update(updateGameDto.id, updateGameDto);
   }
+
+  @SubscribeMessage('send_play')
+  async handlesendingPlay(@MessageBody() data: GameType) {
+    this.gameService.handleGameData(data);
+  }
+
+  @SubscribeMessage('receive_play')
+  async handlereceptionPlay(@MessageBody() data: { [value: string]: string }) {}
 }

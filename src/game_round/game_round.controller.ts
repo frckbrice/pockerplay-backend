@@ -17,7 +17,7 @@ export class GameRoundController {
 
   @Post()
   create(@Body() createGameRoundDto: CreateGameRoundDto) {
-    return this.gameRoundService.create(createGameRoundDto);
+    return this.gameRoundService.createRound(createGameRoundDto);
   }
 
   @Get()
@@ -35,7 +35,7 @@ export class GameRoundController {
     @Param('id') id: string,
     @Body() updateGameRoundDto: UpdateGameRoundDto,
   ) {
-    return this.gameRoundService.update(+id, updateGameRoundDto);
+    return this.gameRoundService.update(id, updateGameRoundDto);
   }
 
   @Delete(':id')

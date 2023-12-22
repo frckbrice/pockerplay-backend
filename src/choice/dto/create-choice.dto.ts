@@ -1,15 +1,24 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateChoiceDto {
-  @IsNotEmpty()
   @IsString()
-  player_id: string;
+  home_player_id?: string;
 
-  @IsNotEmpty()
   @IsString()
-  option_id: string;
+  guess_player_id?: string;
 
-  @IsNotEmpty()
   @IsString()
-  choice_made: string;
+  home_player_choice?: string;
+
+  @IsString()
+  guess_player_choice?: string;
+
+  @IsString()
+  proposals: string;
+
+  @IsString()
+  home_message_hint?: string;
+
+  @IsString()
+  guess_message_hint?: string;
 }

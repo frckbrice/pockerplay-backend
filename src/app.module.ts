@@ -5,7 +5,7 @@ import { MessagesModule } from './messages/messages.module';
 import { UsersModule } from './users/users.module';
 import { ChoiceModule } from './choice/choice.module';
 import { GameRoundModule } from './game_round/game_round.module';
-import { OptionModule } from './options/option.module';
+// import { OptionModule } from './options/option.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 
 import { GameModule } from './game/game.module';
@@ -18,7 +18,7 @@ import { GuessModule } from './guess/guess.module';
     UsersModule,
     ChoiceModule,
     GameRoundModule,
-    OptionModule,
+    // OptionModule,
     SequelizeModule.forRoot({
       dialect: 'mysql',
       host: 'localhost', //"db4free.net",

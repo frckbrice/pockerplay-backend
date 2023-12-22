@@ -4,23 +4,26 @@ import { IsString, IsOptional, IsNumber } from 'class-validator';
 
 export class UpdateGameDto extends PartialType(CreateGameDto) {
   // id: number;
-  // @IsNotEmpty()
-  @IsString()
-  winner: string;
-
   @IsOptional()
   @IsString()
-  guess_player_id: string;
+  winner?: string;
+
+  @IsString()
+  id?: string;
+
+  @IsOptional()
+  @IsString()
+  guess_player_id?: string;
 
   @IsNumber()
   @IsOptional()
-  guess_player_score: number;
+  guess_player_score?: number;
 
   @IsNumber()
   @IsOptional()
-  home_player_score: number;
+  home_player_score?: number;
 
   @IsNumber()
   @IsOptional()
-  number_of_round: number;
+  number_of_round?: number;
 }
