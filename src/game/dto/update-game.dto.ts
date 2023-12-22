@@ -10,15 +10,15 @@ export class UpdateGameDto extends PartialType(CreateGameDto) {
 
   @IsOptional()
   @IsString()
-  player2_id: string;
+  guess_player_id: string;
 
   @IsNumber()
   @IsOptional()
-  away_score: number;
+  guess_player_score: number;
 
   @IsNumber()
   @IsOptional()
-  home_score: number;
+  home_player_score: number;
 
   @IsNumber()
   @IsOptional()

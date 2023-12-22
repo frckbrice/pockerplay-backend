@@ -1,13 +1,13 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateGameDto {
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  player1_id: string;
+  home_player_id: string;
 
   @IsOptional()
   @IsString()
-  player2_id: string;
+  guess_player_id: string;
 
   @IsString()
   @IsOptional()
@@ -15,11 +15,11 @@ export class CreateGameDto {
 
   @IsNumber()
   @IsOptional()
-  away_score: number;
+  home_player_score: number;
 
   @IsNumber()
   @IsOptional()
-  home_score: number;
+  guess_player_score: number;
 
   @IsNumber()
   @IsOptional()

@@ -20,9 +20,6 @@ export default class User extends Model {
   @Column
   image: string;
 
-  @Column
-  phone: string;
-
   @HasMany(() => GameSession)
   games: GameSession[];
 }

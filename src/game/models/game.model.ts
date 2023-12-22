@@ -22,11 +22,11 @@ export class GameSession extends Model {
 
   @ForeignKey(() => User)
   @Column({ type: DataType.UUID })
-  player1_id: string;
+  home_player_id: string;
 
   @ForeignKey(() => User)
   @Column({ type: DataType.UUID })
-  player2_id: string;
+  guess_player_id: string;
 
   @Column
   winner: string;
@@ -35,10 +35,10 @@ export class GameSession extends Model {
   // score: Score;
 
   @Column
-  home_score: number;
+  home_player_score: number;
 
   @Column
-  away_score: number;
+  guess_player_score: number;
 
   @Column
   number_of_rounds: number;

@@ -11,34 +11,34 @@ export class GameService {
   ) {}
   async create(createGameDto: CreateGameDto) {
     const newGame = new this.gameSession({
-      player1_id: createGameDto.player1_id,
-      player2_id: createGameDto.player2_id,
+      home_player_id: createGameDto.home_player_id,
+      guess_player_id: '',
     });
 
-    return await newGame.save();
+    return (await newGame.save()).id;
   }
 
   findAll() {
     return `This action returns all game`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} game`;
+  async findOneUser(id: string) {
+    return { name: 'fake' };
   }
 
   async update(id: string, updateGameDto: UpdateGameDto) {
     const existingGame = await this.gameSession.findByPk(id);
     if (existingGame) {
-      if (updateGameDto.player2_id)
-        existingGame.player2_id = updateGameDto.player2_id;
+      if (updateGameDto.guess_player_id)
+        existingGame.guess_player_id = updateGameDto.guess_player_id;
       else {
-        existingGame.home_score = updateGameDto?.home_score;
-        existingGame.away_score = updateGameDto?.away_score;
+        existingGame.home_player_score = updateGameDto?.home_player_score;
+        existingGame.guess_player_score = updateGameDto?.guess_player_score;
         existingGame.winner = updateGameDto?.winner;
         existingGame.number_of_rounds = updateGameDto?.number_of_rounds;
       }
 
-      return await existingGame.save();
+      return (await existingGame.save()).id;
     }
 
     return `This action updates a #${id} game`;

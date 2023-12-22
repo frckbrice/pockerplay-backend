@@ -21,11 +21,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`user ${client.id} has connected`);
   }
 
-  handleDisconnect(client: any) {
+  handleDisconnect(client: Socket, ...args: any[]): any {
+    client.leave(client.id);
     console.log(`user ${client.id} disconnected`);
   }
 
-  @SubscribeMessage('createGame')
+  @SubscribeMessage('init')
   async create(@MessageBody() createGameDto: CreateGameDto) {
     return await this.gameService.create(createGameDto);
   }
@@ -36,12 +37,25 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     client.join(data.gameSession);
+    this.server
+      .to(data.gameSession)
+      .emit('notify', `🟢 ${data.player} is connected`);
     return this.gameService.findAll();
   }
 
-  @SubscribeMessage('findOneGame')
-  findOne(@MessageBody() id: number) {
-    return this.gameService.findOne(id);
+  @SubscribeMessage('disconnected')
+  async handleDisconnection(
+    @MessageBody() data: { [value: string]: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const player = await this.gameService.findOneUser(data.player_id);
+    this.server
+      .to(data.gamesession)
+      .emit('disconnected', `🔴 ${data?.player} disconnected`);
+
+    this.handleDisconnect(client);
+
+    console.log(`The user  ${player.name} has disconnected`);
   }
 
   // @SubscribeMessage('updateGame')
