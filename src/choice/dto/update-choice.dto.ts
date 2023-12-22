@@ -5,5 +5,5 @@ import { IsNotEmpty, IsString } from 'class-validator';
 export class UpdateChoiceDto extends PartialType(CreateChoiceDto) {
   @IsNotEmpty()
   @IsString()
-  choice: string;
+  choice_made: string;
 }

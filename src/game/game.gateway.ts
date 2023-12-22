@@ -4,32 +4,38 @@ import {
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  WebSocketServer,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
-import { Option } from 'src/options/models/option.model';
-import { Socket } from 'net';
+import { Socket, Server } from 'socket.io';
 
 @WebSocketGateway()
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly gameService: GameService) {}
 
-  handleConnection(client: Socket, ...args: any[]): any {
-    console.log(`user ${client} has connected`);
+  @WebSocketServer() server: Server;
+  handleConnection(client: Socket): any {
+    console.log(`user ${client.id} has connected`);
   }
 
   handleDisconnect(client: any) {
-    console.log(`user ${client} disconnected`);
+    console.log(`user ${client.id} disconnected`);
   }
 
   @SubscribeMessage('createGame')
-  create(@MessageBody() createGameDto: CreateGameDto) {
-    return this.gameService.create(createGameDto);
+  async create(@MessageBody() createGameDto: CreateGameDto) {
+    return await this.gameService.create(createGameDto);
   }
 
-  @SubscribeMessage('findAllGame')
-  findAll() {
+  @SubscribeMessage('join_game')
+  handleJoinGame(
+    @MessageBody() data: { [value: string]: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.join(data.gameSession);
     return this.gameService.findAll();
   }
 
@@ -38,10 +44,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return this.gameService.findOne(id);
   }
 
-  @SubscribeMessage('updateGame')
-  update(@MessageBody() updateGameDto: UpdateGameDto) {
-    return this.gameService.update(updateGameDto.id, updateGameDto);
-  }
+  // @SubscribeMessage('updateGame')
+  // update(@MessageBody() updateGameDto: UpdateGameDto) {
+  //   return this.gameService.update(updateGameDto., updateGameDto);
+  // }
 
   @SubscribeMessage('removeGame')
   remove(@MessageBody() id: number) {

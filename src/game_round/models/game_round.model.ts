@@ -35,7 +35,7 @@ export class GameRound extends Model {
   message: Message[];
 
   @HasMany(() => Option)
-  option: Option[];
+  options: Option[];
 
   @Column
   roundNumber: number;

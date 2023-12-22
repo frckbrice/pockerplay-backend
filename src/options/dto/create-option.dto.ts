@@ -7,5 +7,13 @@ export class CreateOptionDto {
 
   @IsString()
   @IsNotEmpty()
-  proposals: string[];
+  round_number: number;
+
+  @IsString()
+  @IsNotEmpty()
+  category: string;
+
+  @IsString()
+  @IsNotEmpty()
+  number_of_proposals: number;
 }

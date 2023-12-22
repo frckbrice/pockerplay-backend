@@ -10,5 +10,5 @@ export class CreateUserDto {
   email: string;
 
   @IsString()
-  picture: string;
+  image: string;
 }

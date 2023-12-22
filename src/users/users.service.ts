@@ -8,8 +8,18 @@ import User from './models/user.model';
 export class UsersService {
   constructor(@InjectModel(User) private userModel: typeof User) {}
 
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  async create_user(createUserDto: CreateUserDto) {
+    const existingUser = await this.userModel.findOne({
+      where: { email: createUserDto.email },
+    });
+
+    if (existingUser) return existingUser;
+    const newUser = new this.userModel({
+      username: createUserDto.username,
+      image: createUserDto.image,
+      email: createUserDto.email,
+    });
+    return await newUser.save();
   }
 
   findAll() {

@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { OptionService } from './option.service';
 import { CreateOptionDto } from './dto/create-option.dto';
 import { UpdateOptionDto } from './dto/update-option.dto';
@@ -8,8 +16,8 @@ export class OptionController {
   constructor(private readonly optionService: OptionService) {}
 
   @Post()
-  create(@Body() createOptionDto: CreateOptionDto) {
-    return this.optionService.create(createOptionDto);
+  async create(@Body() createOptionDto: CreateOptionDto) {
+    return await this.optionService.generateNewOptions(createOptionDto);
   }
 
   @Get()
