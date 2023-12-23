@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { InjectModel } from '@nestjs/sequelize';
@@ -66,12 +66,23 @@ export class GameService {
             home_message_hint: data.message_hint,
             proposals: data.proposals,
           };
-          this.choiceService.create(homeValues);
+          return await this.choiceService.create(homeValues);
         } else {
           if (data.player_id === game.guess_player_id) {
+            const homeValues = {
+              guess_player_id: data.player_id,
+              guess_player_choice: data.player_choice,
+              round_id: data.round_id,
+              guess_message_hint: data.message_hint,
+              proposals: data.proposals,
+            };
+            return await this.choiceService.create(homeValues);
           }
         }
       }
+    } else {
+      console.log(' no game session id');
+      throw new NotFoundException('No game session id');
     }
   }
 }

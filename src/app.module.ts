@@ -12,6 +12,7 @@ import { GameModule } from './game/game.module';
 import { GuessModule } from './guess/guess.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { CacheModule, CacheInterceptor } from '@nestjs/cache-manager';
+import { ScoreModule } from './score/score.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { CacheModule, CacheInterceptor } from '@nestjs/cache-manager';
 
     GuessModule,
     CacheModule.register(),
+    ScoreModule,
   ],
   controllers: [AppController],
   providers: [

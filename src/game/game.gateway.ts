@@ -72,8 +72,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('send_play')
-  async handlesendingPlay(@MessageBody() data: GameType) {
+  async handlesendingChoice(@MessageBody() data: GameType) {
     this.server.to(data.gamesession_id).emit('receive_play', data);
-    this.gameService.handleGameData(data);
+    await this.gameService.handleGameData(data);
+  }
+
+  @SubscribeMessage('send_guess')
+  async handlesendingGuess(@MessageBody() data: GameType) {
+    this.server.to(data.gamesession_id).emit('receive_play', data);
+    await this.gameService.handleGameData(data);
   }
 }
