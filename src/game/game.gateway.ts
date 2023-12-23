@@ -11,7 +11,7 @@ import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { Socket, Server } from 'socket.io';
-import { GameType } from './interface/game.interface';
+import { GameGuessType, GameType } from './interface/game.interface';
 
 @WebSocketGateway()
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -41,9 +41,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { [value: string]: string },
     @ConnectedSocket() client: Socket,
   ) {
-    client.join(data.gameSession);
-    await this.gameService.update(data.gameSession, {
-      guess_player_id: data.player,
+    client.join(data.gameSession_id);
+    await this.gameService.update(data.gameSession_id, {
+      guess_player_id: data.guess_player_id,
     });
     this.server
       .to(data.gameSession)
@@ -71,15 +71,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     return await this.gameService.update(updateGameDto.id, updateGameDto);
   }
 
-  @SubscribeMessage('send_play')
+  @SubscribeMessage('send_choice')
   async handlesendingChoice(@MessageBody() data: GameType) {
-    this.server.to(data.gamesession_id).emit('receive_play', data);
+    this.server.to(data.gamesession_id).emit('receive_data', {
+      proposal: data.proposals,
+      message: data.message_hint,
+    });
     await this.gameService.handleGameData(data);
   }
 
   @SubscribeMessage('send_guess')
-  async handlesendingGuess(@MessageBody() data: GameType) {
-    this.server.to(data.gamesession_id).emit('receive_play', data);
-    await this.gameService.handleGameData(data);
+  async handlesendingGuess(@MessageBody() data: GameGuessType) {
+    const gameState = await this.gameService.handleGuessData(data);
+    this.server
+      .to(data.gamesession_id)
+      .emit('receive_data', { guess: data.player_guess, gameState });
   }
 }

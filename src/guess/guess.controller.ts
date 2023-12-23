@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { GuessService } from './guess.service';
 import { CreateGuessDto } from './dto/create-guess.dto';
 import { UpdateGuessDto } from './dto/update-guess.dto';
@@ -24,7 +32,7 @@ export class GuessController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateGuessDto: UpdateGuessDto) {
-    return this.guessService.update(+id, updateGuessDto);
+    return this.guessService.update(id, updateGuessDto);
   }
 
   @Delete(':id')

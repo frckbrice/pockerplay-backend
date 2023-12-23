@@ -19,4 +19,8 @@ export class CreateGameRoundDto {
   @IsString()
   @IsNotEmpty()
   number_of_proposals: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  proposals: string;
 }

@@ -34,7 +34,7 @@ export class GameRoundController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.gameRoundService.findOne(+id);
+    return this.gameRoundService.findOne(id);
   }
 
   @Patch(':id')

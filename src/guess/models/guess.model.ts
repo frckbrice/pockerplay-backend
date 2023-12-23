@@ -8,6 +8,7 @@ import {
 } from 'sequelize-typescript';
 import User from 'src/users/models/user.model';
 import { GameRound } from 'src/game_round/models/game_round.model';
+import { Choice } from 'src/choice/models/choice.model';
 
 @Table({
   freezeTableName: true,
@@ -36,6 +37,10 @@ export class Guess extends Model {
   @Column({ type: DataType.UUID })
   round_id: string;
 
+  @ForeignKey(() => Choice)
+  @Column({ type: DataType.UUID })
+  choice_id: string;
+
   @Column
   home_player_guess: string;
 
@@ -43,11 +48,17 @@ export class Guess extends Model {
   guess_player_guess: string;
 
   @Column
-  isCorrect: boolean;
+  home_guess_isCorrect: boolean;
+
+  @Column
+  guess_guess_isCorrect: boolean;
 
   @BelongsTo(() => User)
   user: User;
 
   @BelongsTo(() => GameRound)
   round: GameRound;
+
+  @BelongsTo(() => Choice)
+  choice: Choice;
 }

@@ -8,5 +8,6 @@ import { GameRound } from './models/game_round.model';
   imports: [SequelizeModule.forFeature([GameRound])],
   controllers: [GameRoundController],
   providers: [GameRoundService],
+  exports: [GameRoundService],
 })
 export class GameRoundModule {}

@@ -11,13 +11,13 @@ export default class User extends Model {
   })
   id: string;
 
-  @Column
+  @Column({ allowNull: false })
   username: string;
 
-  @Column
+  @Column({ allowNull: false })
   email: string;
 
-  @Column
+  @Column({ allowNull: false })
   image: string;
 
   @HasMany(() => GameSession)

@@ -3,10 +3,11 @@ import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { GameSession } from './models/game.model';
-import { GameType } from './interface/game.interface';
+import { GameGuessType, GameType } from './interface/game.interface';
 import { UsersService } from 'src/users/users.service';
 import { v4 as UUIDV4 } from 'uuid';
 import { ChoiceService } from 'src/choice/choice.service';
+import { GuessService } from 'src/guess/guess.service';
 
 @Injectable()
 export class GameService {
@@ -14,6 +15,7 @@ export class GameService {
     @InjectModel(GameSession) private gameModel: typeof GameSession,
     private userService: UsersService,
     private choiceService: ChoiceService,
+    private guessService: GuessService,
   ) {}
   async create(createGameDto: CreateGameDto) {
     const newGame = new this.gameModel({
@@ -32,9 +34,10 @@ export class GameService {
   }
 
   async update(id: string, updateGameDto?: UpdateGameDto) {
+    // const newID = UUIDV4(id);
     const existingGame = await this.gameModel.findByPk(id);
     if (existingGame) {
-      if (updateGameDto?.guess_player_id)
+      if (updateGameDto?.guess_player_id && !existingGame.guess_player_id)
         existingGame.guess_player_id = updateGameDto?.guess_player_id;
       else {
         existingGame.home_player_score = updateGameDto?.home_player_score;
@@ -54,35 +57,50 @@ export class GameService {
   }
 
   async handleGameData(data: GameType) {
-    if (data.gamesession_id) {
-      const game = await this.gameModel.findByPk(data.gamesession_id);
-      console.log('existing game: ', game);
-      if (game) {
-        if (game.home_player_id === data.player_id) {
-          const homeValues = {
-            home_player_id: data.player_id,
-            home_player_choice: data.player_choice,
-            round_id: data.round_id,
-            home_message_hint: data.message_hint,
-            proposals: data.proposals,
-          };
-          return await this.choiceService.create(homeValues);
-        } else {
-          if (data.player_id === game.guess_player_id) {
-            const homeValues = {
-              guess_player_id: data.player_id,
-              guess_player_choice: data.player_choice,
-              round_id: data.round_id,
-              guess_message_hint: data.message_hint,
-              proposals: data.proposals,
-            };
-            return await this.choiceService.create(homeValues);
-          }
-        }
-      }
-    } else {
-      console.log(' no game session id');
-      throw new NotFoundException('No game session id');
+    if (data.role === 'home_player') {
+      const homeValues = {
+        home_player_id: data.player_id,
+        home_player_choice: data.player_choice,
+        round_id: data.round_id,
+        home_message_hint: data.message_hint,
+        proposals: data.proposals,
+      };
+      return await this.choiceService.create(homeValues);
+    } else if (data.role === 'guess_player') {
+      const homeValues = {
+        guess_player_id: data.player_id,
+        guess_player_choice: data.player_choice,
+        round_id: data.round_id,
+        guess_message_hint: data.message_hint,
+        proposals: data.proposals,
+      };
+      return await this.choiceService.update(data.id, homeValues);
+    }
+    // } else {
+    //   console.log(' no game session id');
+    //   throw new NotFoundException('No game session id');
+    // }
+  }
+
+  async handleGuessData(data: GameGuessType) {
+    if (data.role === 'home_player') {
+      const homeGuesses = {
+        choice_id: data.choice_id,
+        home_player_guess: data.player_guess,
+        home_player_id: data.player_id,
+        round_id: data.round_id,
+      };
+
+      return await this.guessService.update(data.choice_id, homeGuesses);
+    } else if (data.role === 'guess_player') {
+      const guessGuesses = {
+        choice_id: data.choice_id,
+        guess_player_guess: data.player_guess,
+        guess_player_id: data.player_id,
+        round_id: data.round_id,
+      };
+
+      return await this.guessService.create(guessGuesses);
     }
   }
 }

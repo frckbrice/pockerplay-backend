@@ -3,19 +3,27 @@ import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 export class CreateGuessDto {
   @IsNotEmpty()
   @IsString()
-  guessing_user: string;
+  home_player_id?: string;
 
   @IsNotEmpty()
   @IsString()
-  option_id: string;
+  guess_player_id?: string;
 
   @IsNotEmpty()
   @IsString()
-  guessed_image: string;
+  home_player_guess?: string;
 
   @IsNotEmpty()
   @IsString()
-  opponent_choice: string;
+  guess_player_guess?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  role?: string;
+
+  @IsNotEmpty()
+  @IsString()
+  choice_id: string;
 
   @IsOptional()
   @IsBoolean()

@@ -36,11 +36,13 @@ export class GameRoundService {
       category,
     });
 
-    if (createGameRoundDto.id || createGameRoundDto.round_number > 1) {
+    if (createGameRoundDto.round_number > 1) {
       const existingGame = await this.update(createGameRoundDto.id, {
         number_of_proposals: createGameRoundDto.number_of_proposals,
         round_number: createGameRoundDto.round_number,
         category: createGameRoundDto.category,
+        proposals: createGameRoundDto.proposals,
+        gamesession_id: createGameRoundDto.gamesession_id,
       });
       if (existingGame) return { ...existingGame, proposals: values };
     }
@@ -54,7 +56,7 @@ export class GameRoundService {
     return `This action returns all gameRound`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} gameRound`;
   }
 
@@ -63,8 +65,10 @@ export class GameRoundService {
     if (existingGameRound) {
       existingGameRound.number_of_proposals =
         updateGameRoundDto.number_of_proposals;
-      existingGameRound.round_number = existingGameRound.round_number + 1;
+      existingGameRound.round_number += 1;
       existingGameRound.category = updateGameRoundDto.category;
+      existingGameRound.proposals = updateGameRoundDto.proposals;
+      existingGameRound.gamesession_id = updateGameRoundDto.gamesession_id;
 
       return await existingGameRound.save();
     } else return null;
@@ -78,4 +82,15 @@ export class GameRoundService {
     const index = Math.floor(Math.random() * arr.length);
     return arr[index];
   };
+
+  async canUpdateRoundNumber(id: string, value: boolean) {
+    const round = await this.gameroundModel.findByPk(id);
+    if (round && value) {
+      round.round_number += 1;
+    }
+    if (round && round.round_number === 5) {
+      return 'game ended';
+    }
+    return await round.save();
+  }
 }

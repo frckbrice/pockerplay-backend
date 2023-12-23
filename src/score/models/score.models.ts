@@ -1,4 +1,12 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  BelongsTo,
+  ForeignKey,
+} from 'sequelize-typescript';
+import { GameRound } from 'src/game_round/models/game_round.model';
 
 @Table({
   freezeTableName: true,
@@ -15,9 +23,16 @@ export class Score extends Model {
   })
   id: string;
 
-  @Column
+  @ForeignKey(() => GameRound)
+  @Column({ type: DataType.UUID })
+  round_id: string;
+
+  @Column({ type: DataType.NUMBER, defaultValue: 0 })
   home_player_score: number;
 
-  @Column
+  @Column({ type: DataType.NUMBER, defaultValue: 0 })
   guess_player_score: number;
+
+  @BelongsTo(() => GameRound)
+  round: GameRound;
 }

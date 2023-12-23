@@ -27,12 +27,12 @@ export class ChoiceController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.choiceService.findOne(+id);
+    return this.choiceService.findChoice(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateChoiceDto: UpdateChoiceDto) {
-    return this.choiceService.update(+id, updateChoiceDto);
+    return this.choiceService.update(id, updateChoiceDto);
   }
 
   @Delete(':id')

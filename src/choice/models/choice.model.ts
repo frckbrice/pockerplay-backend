@@ -5,8 +5,10 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  HasOne,
 } from 'sequelize-typescript';
 import { GameRound } from 'src/game_round/models/game_round.model';
+import { Guess } from 'src/guess/models/guess.model';
 
 import User from 'src/users/models/user.model';
 
@@ -52,4 +54,7 @@ export class Choice extends Model {
 
   @BelongsTo(() => GameRound)
   round: GameRound;
+
+  @HasOne(() => Guess)
+  guess: Guess;
 }

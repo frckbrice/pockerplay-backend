@@ -8,8 +8,10 @@ import {
   // UpdatedAt,
   // DeletedAt,
   BelongsTo,
+  HasOne,
 } from 'sequelize-typescript';
 import { GameSession } from 'src/game/models/game.model';
+import { Score } from 'src/score/models/score.models';
 
 @Table({ timestamps: true, tableName: 'gamesession', freezeTableName: true })
 export class GameRound extends Model {
@@ -27,6 +29,9 @@ export class GameRound extends Model {
 
   @BelongsTo(() => GameSession)
   game: GameSession;
+
+  @HasOne(() => Score)
+  score: Score;
 
   @Column
   proposals: string;
