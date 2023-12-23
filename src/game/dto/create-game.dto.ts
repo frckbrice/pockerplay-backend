@@ -21,7 +21,7 @@ export class CreateGameDto {
   @IsOptional()
   guess_player_score?: number;
 
-  @IsNumber()
-  @IsOptional()
-  number_of_rounds?: number;
+  // @IsNumber()
+  // @IsOptional()
+  // number_of_rounds?: number;
 }

@@ -13,5 +13,5 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 
   @IsString()
   @IsOptional()
-  picture: string;
+  image: string;
 }

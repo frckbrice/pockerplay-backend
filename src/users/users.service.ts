@@ -28,7 +28,6 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    const newId = UUIDV4(id);
     return await this.userModel.findByPk(id);
   }
 

@@ -79,7 +79,7 @@ export class GuessService {
       updatedGuess.home_guess_isCorrect &&
       updatedGuess.home_guess_isCorrect
     ) {
-      const gameState = await this.roundService.canUpdateRoundNumber(
+      const gameState = await this.updateRoundNumber(
         updatedGuess.round_id,
         true,
       );
@@ -88,7 +88,11 @@ export class GuessService {
     return updatedGuess.toJSON();
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} guess`;
+  updateRoundNumber(roundId: string, value: boolean) {
+    return this.roundService.canUpdateRoundNumber(roundId, value);
+  }
+
+  async getScore(roundId: string) {
+    return await this.scoreService.findOne(roundId);
   }
 }

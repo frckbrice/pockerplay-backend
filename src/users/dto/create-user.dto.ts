@@ -10,5 +10,6 @@ export class CreateUserDto {
   email: string;
 
   @IsString()
+  @IsNotEmpty()
   image: string;
 }

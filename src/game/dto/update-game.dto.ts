@@ -23,7 +23,7 @@ export class UpdateGameDto extends PartialType(CreateGameDto) {
   @IsOptional()
   home_player_score?: number;
 
-  @IsNumber()
-  @IsOptional()
-  number_of_round?: number;
+  // @IsNumber()
+  // @IsOptional()
+  // number_of_round?: number;
 }

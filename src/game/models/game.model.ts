@@ -34,14 +34,14 @@ export class GameSession extends Model {
   // @Column
   // score: Score;
 
-  @Column
+  @Column({ type: DataType.NUMBER, defaultValue: 0 })
   home_player_score: number;
 
-  @Column
+  @Column({ type: DataType.NUMBER, defaultValue: 0 })
   guess_player_score: number;
 
-  @Column
-  number_of_rounds: number;
+  // @Column
+  // number_of_rounds: number;
 
   @BelongsTo(() => User)
   user: User;

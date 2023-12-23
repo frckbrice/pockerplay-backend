@@ -8,6 +8,7 @@ import { UsersService } from 'src/users/users.service';
 import { v4 as UUIDV4 } from 'uuid';
 import { ChoiceService } from 'src/choice/choice.service';
 import { GuessService } from 'src/guess/guess.service';
+import { GameRoundService } from 'src/game_round/game_round.service';
 
 @Injectable()
 export class GameService {
@@ -16,6 +17,7 @@ export class GameService {
     private userService: UsersService,
     private choiceService: ChoiceService,
     private guessService: GuessService,
+    private roundService: GameRoundService,
   ) {}
   async create(createGameDto: CreateGameDto) {
     const newGame = new this.gameModel({
@@ -43,7 +45,6 @@ export class GameService {
         existingGame.home_player_score = updateGameDto?.home_player_score;
         existingGame.guess_player_score = updateGameDto?.guess_player_score;
         existingGame.winner = updateGameDto?.winner;
-        existingGame.number_of_rounds = updateGameDto?.number_of_rounds;
       }
 
       return (await existingGame.save()).toJSON();
@@ -52,8 +53,35 @@ export class GameService {
     return `This action updates a #${id} game`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} game`;
+  async endGame(gameId: string, roundId: string) {
+    const existingGame = await this.gameModel.findByPk(gameId);
+    if (existingGame) {
+      const round = await this.roundService.findOne(roundId);
+
+      const roundScore = await this.guessService.getScore(roundId);
+
+      const home_player = await this.userService.findOne(
+        existingGame.home_player_id,
+      );
+
+      const guess_player = await this.userService.findOne(
+        existingGame.guess_player_id,
+      );
+
+      if (roundScore && round) {
+        existingGame.home_player_score = roundScore.home_player_score;
+        existingGame.guess_player_score = roundScore.guess_player_score;
+
+        if (roundScore.home_player_score > roundScore.guess_player_score) {
+          existingGame.winner = home_player.username;
+        } else if (
+          roundScore.home_player_score < roundScore.guess_player_score
+        ) {
+          existingGame.winner = guess_player.username;
+        }
+      }
+      return await existingGame.save();
+    }
   }
 
   async handleGameData(data: GameType) {

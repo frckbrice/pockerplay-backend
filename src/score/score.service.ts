@@ -18,8 +18,12 @@ export class ScoreService {
     return `This action returns all score`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} score`;
+  async findOne(id: string) {
+    return await this.scoreModel.findOne({
+      where: {
+        round_id: id,
+      },
+    });
   }
 
   async update(id: string, updateScoreDto: ScoreType) {

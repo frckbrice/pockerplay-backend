@@ -32,11 +32,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() createGameDto: CreateGameDto,
     @ConnectedSocket() client: Socket,
   ) {
-    client.join(createGameDto.home_player_id);
-    return await this.gameService.create(createGameDto);
+    const newgame = await this.gameService.create(createGameDto);
+    if (newgame) client.join(newgame);
+    this.server.to(createGameDto.home_player_id).emit('initgame', newgame);
   }
 
-  @SubscribeMessage('newgame')
+  @SubscribeMessage('joingame')
   async handleJoinGame(
     @MessageBody() data: { [value: string]: string },
     @ConnectedSocket() client: Socket,
@@ -46,9 +47,18 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       guess_player_id: data.guess_player_id,
     });
     this.server
-      .to(data.gameSession)
+      .to(data.gameSession_id)
       .emit('notify', `🟢 ${data.player} is connected`);
     return this.gameService.findAll();
+  }
+
+  @SubscribeMessage('endgame')
+  async handleEndGame(
+    @MessageBody() data: { [value: string]: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.leave(data.gameSession_id);
+    this.handleDisconnection(data, client);
   }
 
   @SubscribeMessage('disconnected')
@@ -60,9 +70,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server
       .to(data.gamesession)
       .emit('disconnected', `🔴 ${data?.player} disconnected`);
-
     this.handleDisconnect(client);
-
     console.log(`The user  ${player.username} has disconnected`);
   }
 
@@ -83,8 +91,19 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('send_guess')
   async handlesendingGuess(@MessageBody() data: GameGuessType) {
     const gameState = await this.gameService.handleGuessData(data);
-    this.server
-      .to(data.gamesession_id)
-      .emit('receive_data', { guess: data.player_guess, gameState });
+    if (gameState === 'end game') {
+      const endG = await this.gameService.endGame(
+        data.gamesession_id,
+        data.round_id,
+      );
+      return this.server.to(data.gamesession_id).emit('endGame', {
+        guess: data.player_guess,
+        gameState,
+        game: endG,
+      });
+    }
+    return this.server.to(data.gamesession_id).emit('receive_data', {
+      guess: data.player_guess,
+    });
   }
 }

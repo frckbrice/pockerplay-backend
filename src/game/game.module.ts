@@ -6,6 +6,7 @@ import { GameSession } from './models/game.model';
 import { UsersModule } from 'src/users/users.module';
 import { ChoiceModule } from 'src/choice/choice.module';
 import { GuessModule } from 'src/guess/guess.module';
+import { GameRoundModule } from 'src/game_round/game_round.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { GuessModule } from 'src/guess/guess.module';
     UsersModule,
     ChoiceModule,
     GuessModule,
+    GameRoundModule,
   ],
   providers: [GameGateway, GameService],
 })

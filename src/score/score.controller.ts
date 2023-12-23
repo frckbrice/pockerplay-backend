@@ -27,7 +27,7 @@ export class ScoreController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.scoreService.findOne(+id);
+    return this.scoreService.findOne(id);
   }
 
   @Patch(':id')

@@ -56,8 +56,9 @@ export class GameRoundService {
     return `This action returns all gameRound`;
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} gameRound`;
+  async findOne(id: string) {
+    const round = await this.gameroundModel.findByPk(id);
+    return round ? round : null;
   }
 
   async update(id: string, updateGameRoundDto: UpdateGameRoundDto) {
@@ -85,10 +86,9 @@ export class GameRoundService {
 
   async canUpdateRoundNumber(id: string, value: boolean) {
     const round = await this.gameroundModel.findByPk(id);
-    if (round && value) {
+    if (round && value && round.round_number !== 5) {
       round.round_number += 1;
-    }
-    if (round && round.round_number === 5) {
+    } else if (round && round.round_number === 5) {
       return 'game ended';
     }
     return await round.save();
