@@ -8,5 +8,6 @@ import { SequelizeModule } from '@nestjs/sequelize';
   imports: [SequelizeModule.forFeature([Choice])],
   controllers: [ChoiceController],
   providers: [ChoiceService],
+  exports: [ChoiceService],
 })
 export class ChoiceModule {}

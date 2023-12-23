@@ -38,8 +38,8 @@ export class Choice extends Model {
   @Column
   guess_player_choice: string;
 
-  @Column
-  proposals: string;
+  // @Column
+  // proposals: string;
 
   @Column
   home_message_hint: string;

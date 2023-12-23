@@ -7,7 +7,6 @@ import {
   BelongsTo,
 } from 'sequelize-typescript';
 import User from 'src/users/models/user.model';
-import { Option } from 'src/options/models/option.model';
 import { GameRound } from 'src/game_round/models/game_round.model';
 
 @Table({

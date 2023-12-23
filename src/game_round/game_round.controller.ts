@@ -6,12 +6,19 @@ import {
   Patch,
   Param,
   Delete,
+  ParseUUIDPipe,
+  UsePipes,
+  ValidationPipe,
+  HttpStatus,
 } from '@nestjs/common';
 import { GameRoundService } from './game_round.service';
 import { CreateGameRoundDto } from './dto/create-game_round.dto';
 import { UpdateGameRoundDto } from './dto/update-game_round.dto';
 
 @Controller('game-round')
+@UsePipes(
+  new ValidationPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+)
 export class GameRoundController {
   constructor(private readonly gameRoundService: GameRoundService) {}
 
@@ -32,7 +39,7 @@ export class GameRoundController {
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateGameRoundDto: UpdateGameRoundDto,
   ) {
     return this.gameRoundService.update(id, updateGameRoundDto);

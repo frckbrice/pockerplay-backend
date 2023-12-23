@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateChoiceDto } from './create-choice.dto';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateChoiceDto extends PartialType(CreateChoiceDto) {
   @IsOptional()

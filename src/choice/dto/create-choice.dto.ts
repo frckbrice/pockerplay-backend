@@ -1,6 +1,12 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class CreateChoiceDto {
+  @IsString()
+  id?: string;
+
+  @IsString()
+  round_id?: string;
+
   @IsString()
   home_player_id?: string;
 

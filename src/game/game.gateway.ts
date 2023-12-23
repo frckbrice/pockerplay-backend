@@ -63,7 +63,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this.handleDisconnect(client);
 
-    console.log(`The user  ${player.name} has disconnected`);
+    console.log(`The user  ${player.username} has disconnected`);
   }
 
   // @SubscribeMessage('updateGame')
@@ -73,9 +73,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('send_play')
   async handlesendingPlay(@MessageBody() data: GameType) {
+    this.server.to(data.gamesession_id).emit('receive_play', data);
     this.gameService.handleGameData(data);
   }
-
-  @SubscribeMessage('receive_play')
-  async handlereceptionPlay(@MessageBody() data: { [value: string]: string }) {}
 }

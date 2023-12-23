@@ -3,6 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import User from './models/user.model';
+import { v4 as UUIDV4 } from 'uuid';
 
 @Injectable()
 export class UsersService {
@@ -26,8 +27,10 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string) {
+    const newId = UUIDV4(id);
+
+    return await this.userModel.findByPk(newId);
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
