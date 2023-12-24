@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+// import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import User from './models/user.model';
-import { v4 as UUIDV4 } from 'uuid';
 
 @Injectable()
 export class UsersService {
@@ -15,12 +14,14 @@ export class UsersService {
     });
 
     if (existingUser) return existingUser;
-    const newUser = new this.userModel({
-      username: createUserDto.username,
-      image: createUserDto.image,
-      email: createUserDto.email,
-    });
-    return await newUser.save();
+    else {
+      const newUser = new this.userModel({
+        username: createUserDto.username,
+        image: createUserDto.image,
+        email: createUserDto.email,
+      });
+      return await newUser.save();
+    }
   }
 
   findAll() {
@@ -31,9 +32,9 @@ export class UsersService {
     return await this.userModel.findByPk(id);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+  // update(id: number, updateUserDto: UpdateUserDto) {
+  //   return `This action updates a #${id} user`;
+  // }
 
   remove(id: number) {
     return `This action removes a #${id} user`;

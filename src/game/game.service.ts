@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { GameSession } from './models/game.model';
 import { GameGuessType, GameType } from './interface/game.interface';
 import { UsersService } from 'src/users/users.service';
-import { v4 as UUIDV4 } from 'uuid';
+
 import { ChoiceService } from 'src/choice/choice.service';
 import { GuessService } from 'src/guess/guess.service';
 import { GameRoundService } from 'src/game_round/game_round.service';
@@ -38,26 +38,32 @@ export class GameService {
   async update(id: string, updateGameDto?: UpdateGameDto) {
     // const newID = UUIDV4(id);
     const existingGame = await this.gameModel.findByPk(id);
-    if (existingGame) {
-      if (updateGameDto?.guess_player_id && !existingGame.guess_player_id)
-        existingGame.guess_player_id = updateGameDto?.guess_player_id;
-      else {
-        existingGame.home_player_score = updateGameDto?.home_player_score;
-        existingGame.guess_player_score = updateGameDto?.guess_player_score;
-        existingGame.winner = updateGameDto?.winner;
-      }
-
-      return (await existingGame.save()).toJSON();
+    console.log('in the update game', updateGameDto);
+    if (
+      existingGame &&
+      !existingGame.guess_player_id &&
+      updateGameDto.guess_player_id
+    ) {
+      console.log('no guess player in update game');
+      existingGame.guess_player_id = updateGameDto?.guess_player_id;
+    } else if (existingGame && existingGame.guess_player_id) {
+      console.log('end the game in update game');
+      existingGame.home_player_score = updateGameDto?.home_player_score;
+      existingGame.guess_player_score = updateGameDto?.guess_player_score;
+      existingGame.winner = updateGameDto?.winner;
     }
 
-    return `This action updates a #${id} game`;
+    return (await existingGame.save()).toJSON();
   }
 
-  async endGame(gameId: string, roundId: string) {
-    const existingGame = await this.gameModel.findByPk(gameId);
-    if (existingGame) {
-      const round = await this.roundService.findOne(roundId);
-
+  async endGame(roundId: string) {
+    console.log('in end game method');
+    let winner: string = '';
+    const round = await this.roundService.findOne(roundId);
+    if (round && round.round_number === 5) {
+      console.log('in end game method, the round', round);
+      const { gamesession_id } = round;
+      const existingGame = await this.gameModel.findByPk(gamesession_id);
       const roundScore = await this.guessService.getScore(roundId);
 
       const home_player = await this.userService.findOne(
@@ -68,17 +74,32 @@ export class GameService {
         existingGame.guess_player_id,
       );
 
-      if (roundScore && round) {
-        existingGame.home_player_score = roundScore.home_player_score;
-        existingGame.guess_player_score = roundScore.guess_player_score;
+      if (roundScore && existingGame && home_player && guess_player) {
+        console.log(
+          'in end game method, the score, player, game',
+          roundScore,
+          existingGame.id,
+          home_player.username,
+          guess_player.username,
+        );
+
+        // existingGame.home_player_score = roundScore.home_player_score;
+        // existingGame.guess_player_score = roundScore.guess_player_score;
 
         if (roundScore.home_player_score > roundScore.guess_player_score) {
-          existingGame.winner = home_player.username;
+          winner = home_player.username;
         } else if (
           roundScore.home_player_score < roundScore.guess_player_score
         ) {
-          existingGame.winner = guess_player.username;
+          winner = guess_player.username;
         }
+
+        const data = {
+          home_player_score: roundScore.home_player_score,
+          guess_player_score: roundScore.guess_player_score,
+          winner,
+        };
+        return await this.update(gamesession_id, data);
       }
       return await existingGame.save();
     }

@@ -22,7 +22,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`user ${client.id} has connected`);
   }
 
-  handleDisconnect(client: Socket, ...args: any[]): any {
+  handleDisconnect(client: Socket): any {
     client.leave(client.id);
     console.log(`user ${client.id} disconnected`);
   }
@@ -34,7 +34,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const newgame = await this.gameService.create(createGameDto);
     if (newgame) client.join(newgame);
-    this.server.to(createGameDto.home_player_id).emit('initgame', newgame);
+    this.server.to(newgame).emit('initgame', newgame);
   }
 
   @SubscribeMessage('joingame')
@@ -92,10 +92,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handlesendingGuess(@MessageBody() data: GameGuessType) {
     const gameState = await this.gameService.handleGuessData(data);
     if (gameState === 'end game') {
-      const endG = await this.gameService.endGame(
-        data.gamesession_id,
-        data.round_id,
-      );
+      const endG = await this.gameService.endGame(data.round_id);
       return this.server.to(data.gamesession_id).emit('endGame', {
         guess: data.player_guess,
         gameState,
