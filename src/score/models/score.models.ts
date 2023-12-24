@@ -27,10 +27,10 @@ export class Score extends Model {
   @Column({ type: DataType.UUID })
   round_id: string;
 
-  @Column({ type: DataType.NUMBER, defaultValue: 0 })
+  @Column({ defaultValue: 0 })
   home_player_score: number;
 
-  @Column({ type: DataType.NUMBER, defaultValue: 0 })
+  @Column({ defaultValue: 0 })
   guess_player_score: number;
 
   @BelongsTo(() => GameRound)

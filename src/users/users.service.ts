@@ -13,14 +13,20 @@ export class UsersService {
       where: { email: createUserDto.email },
     });
 
-    if (existingUser) return existingUser;
-    else {
+    if (existingUser) {
+      console.log('existing user', existingUser);
+      return existingUser;
+    } else {
+      console.log('not existing user');
       const newUser = new this.userModel({
         username: createUserDto.username,
         image: createUserDto.image,
         email: createUserDto.email,
       });
-      return await newUser.save();
+
+      const storedUser = await newUser.save();
+      console.log(storedUser);
+      return storedUser;
     }
   }
 

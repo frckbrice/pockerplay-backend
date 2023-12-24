@@ -34,10 +34,10 @@ export class GameSession extends Model {
   // @Column
   // score: Score;
 
-  @Column({ type: DataType.NUMBER, defaultValue: 0 })
+  @Column({ defaultValue: 0 })
   home_player_score: number;
 
-  @Column({ type: DataType.NUMBER, defaultValue: 0 })
+  @Column({ defaultValue: 0 })
   guess_player_score: number;
 
   // @Column
