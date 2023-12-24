@@ -1,0 +1,52 @@
+import { faker } from '@faker-js/faker';
+
+export const randomWords = [
+  `${faker.animal.bear()}`,
+  `${faker.animal.cow()}`,
+  `${faker.animal.crocodilia()}`,
+  `${faker.animal.rabbit()}`,
+  `${faker.animal.snake()}`,
+  `${faker.animal.dog()}`,
+  `${faker.animal.bird()}`,
+  `${faker.animal.cat()}`,
+  `${faker.animal.horse()}`,
+  `${faker.animal.lion()}`,
+  `${faker.animal.fish()}`,
+
+  `${faker.airline.airline()}`,
+  `${faker.airline.airplane()}`,
+  `${faker.airline.airport()}`,
+
+  `${faker.commerce.product()}`,
+  `${faker.commerce.productName()}`,
+  `${faker.internet.protocol()}`,
+  `${faker.internet.emoji()}`,
+  `${faker.internet.avatar()}`,
+  `${faker.internet.httpStatusCode()}`,
+  `${faker.vehicle.vehicle()}`,
+  `${faker.vehicle.manufacturer()}`,
+  `${faker.system.commonFileExt()}`,
+  `${faker.system.commonFileType()}`,
+  `${faker.system.fileExt()}`,
+  `${faker.word.verb()}`,
+  `${faker.word.adjective()}`,
+  `${faker.word.noun()}`,
+];
+
+export const images = [
+  `${faker.image.urlLoremFlickr({ category: 'animals' })}`,
+  `${faker.image.urlLoremFlickr({ category: 'business' })}`,
+  `${faker.image.urlLoremFlickr({ category: 'cats' })}`,
+  `${faker.image.urlLoremFlickr({ category: 'city' })}`,
+  `${faker.image.urlLoremFlickr({ category: 'fashion' })}`,
+  `${faker.image.urlLoremFlickr({ category: 'food' })}`,
+  `${faker.image.urlLoremFlickr({ category: 'nature' })}`,
+  `${faker.image.urlLoremFlickr({ category: 'nightlife' })}`,
+  `${faker.image.urlLoremFlickr({ category: 'people' })}`,
+  `${faker.image.urlLoremFlickr({ category: 'sports' })}`,
+  `${faker.image.urlLoremFlickr({ category: 'technics' })}`,
+  `${faker.image.urlLoremFlickr({ category: 'transport' })}`,
+  `${faker.image.urlLoremFlickr()}`,
+  `${faker.image.urlPicsumPhotos()}`,
+  `${faker.image.urlPlaceholder()}`,
+];
