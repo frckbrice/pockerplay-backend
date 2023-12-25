@@ -43,19 +43,15 @@ export class GameRoundService {
     //   if (existingGame) return { ...existingGame, proposals: JSON.parse(existingGame.proposals) };
     // }else {
 
-      if(rowToStore.round_number <= 5 && rowToStore.round_number>0) {
-        const newRound = await rowToStore.save();
-        return { ...newRound, proposals: JSON.parse(newRound.proposals) };
-      }else {
-        console.log("only 5 rounds are allowed");
+    if (rowToStore.round_number <= 5 && rowToStore.round_number > 0) {
+      const newRound = await rowToStore.save();
+      return { ...newRound, proposals: JSON.parse(newRound.proposals) };
+    } else {
+      console.log('only 5 rounds are allowed');
       return null;
-      }
-      
+    }
 
-     
     // }
-
-   
   }
 
   findAll() {
@@ -74,7 +70,7 @@ export class GameRoundService {
         updateGameRoundDto.number_of_proposals;
       existingGameRound.round_number += 1;
       existingGameRound.category = updateGameRoundDto.category;
-      existingGameRound.proposals = updateGameRoundDto.proposals;
+      // existingGameRound.proposals = updateGameRoundDto.proposals;
       existingGameRound.gamesession_id = updateGameRoundDto.gamesession_id;
 
       return await existingGameRound.save();
@@ -95,6 +91,5 @@ export class GameRoundService {
     if (round && round.round_number === 5) {
       return 'game ended';
     }
-   
   }
 }

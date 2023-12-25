@@ -9,10 +9,9 @@ import {
 } from '@nestjs/websockets';
 import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
-import { UpdateGameDto } from './dto/update-game.dto';
+// import { UpdateGameDto } from './dto/update-game.dto';
 import { Socket, Server } from 'socket.io';
 import { GameGuessType, GameType } from './interface/game.interface';
-import { Client } from 'socket.io/dist/client';
 
 @WebSocketGateway()
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -98,14 +97,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const gameState = await this.gameService.handleGuessData(data);
     if (gameState === 'end game') {
       const endG = await this.gameService.endGame(data.round_id);
-      this.handleEndGame(client, {gameSession_id: data.gamesession_id});
+      this.handleEndGame(client, { gameSession_id: data.gamesession_id });
       return this.server.to(data.gamesession_id).emit('endGame', {
         guess: data.player_guess,
         role: data.role,
         gameState,
         game: endG,
       });
-      
     }
     return this.server.to(data.gamesession_id).emit('receive_guess', {
       guess: data.player_guess,
