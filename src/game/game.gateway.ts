@@ -42,18 +42,22 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { [value: string]: string },
     @ConnectedSocket() client: Socket,
   ) {
-    if (data) {
+    if (data && data.playerId) {
       client.join(data?.gameSession_id);
-      if (data?.guess_player_id) {
-        await this.gameService.update(data?.gameSession_id, {
-          guess_player_id: data?.guess_player_id,
-        });
-        const player = await this.gameService.findOneUser(
-          data?.guess_player_id,
-        );
-        this.server
-          .to(data.gameSession_id)
-          .emit('notify', `🟢 ${player.username} is connected`);
+      const gameUpdate = await this.gameService.registerGuessPlayer(
+        data?.gameSession_id,
+        {
+          guess_player_id: data.playerId,
+        },
+      );
+      const player = await this.gameService.findOneUser(data?.playerId);
+      if (gameUpdate.existGame) {
+        const notification = {
+          notify: `🟢 ${player.username} is connected`,
+          role: gameUpdate.existGame ? 'guess_player' : 'home_player',
+          homePlayer: gameUpdate.homePlayer,
+        };
+        this.server.to(data?.gameSession_id).emit('notify', notification);
       }
     }
   }
