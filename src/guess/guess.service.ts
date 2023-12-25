@@ -20,23 +20,24 @@ export class GuessService {
     const choice = await this.choiceService.findChoice(
       createGuessDto.choice_id,
     );
-
-    const newGuess = new this.guessModel({
-      choice_id: createGuessDto.choice_id,
-      guess_player_guess: createGuessDto.player_guess,
-      guess_player_id: createGuessDto.player_id,
-      round_id: createGuessDto.round_id,
-      guess_guess_isCorrect:
-        createGuessDto.player_guess === choice.home_player_choice,
-      gameSession_id: createGuessDto.gamesession_id,
-    });
-
-    if (newGuess.guess_guess_isCorrect)
-      await this.scoreService.update(newGuess.round_id, {
-        guess_player_isCorrect: newGuess.guess_guess_isCorrect,
+    if (choice) {
+      const newGuess = new this.guessModel({
+        choice_id: createGuessDto.choice_id,
+        guess_player_guess: createGuessDto.player_guess,
+        guess_player_id: createGuessDto.player_id,
+        round_id: createGuessDto.round_id,
+        guess_guess_isCorrect:
+          createGuessDto.player_guess === choice.home_player_choice,
+        gameSession_id: createGuessDto.gamesession_id,
       });
 
-    return await newGuess.save();
+      if (newGuess.guess_guess_isCorrect)
+        await this.scoreService.update(newGuess.round_id, {
+          guess_player_isCorrect: newGuess.guess_guess_isCorrect,
+        });
+
+      return await newGuess.save();
+    }
   }
 
   findAll() {
@@ -48,21 +49,18 @@ export class GuessService {
   }
 
   async update(id: string, updateGuessDto: GameGuessType) {
-    const checkGuess = await this.guessModel.findOne({
-      where: {
-        choice_id: updateGuessDto.choice_id,
-      },
-    });
+    const checkGuess = await this.guessModel.findByPk(id);
 
-    const choice = await this.choiceService.findChoice(id);
-
-    if (choice && checkGuess) {
-      checkGuess.choice_id = updateGuessDto.choice_id;
-      checkGuess.home_player_guess = updateGuessDto.player_guess;
-      checkGuess.home_player_id = updateGuessDto.player_id;
-      checkGuess.round_id = updateGuessDto.round_id;
-      checkGuess.home_guess_isCorrect =
-        updateGuessDto.player_guess === choice.guess_player_choice;
+    if (checkGuess) {
+      const choice = await this.choiceService.findChoice(checkGuess.choice_id);
+      if (choice) {
+        checkGuess.choice_id = choice.id;
+        checkGuess.home_player_guess = updateGuessDto.player_guess;
+        checkGuess.home_player_id = updateGuessDto.player_id;
+        checkGuess.round_id = updateGuessDto.round_id;
+        checkGuess.home_guess_isCorrect =
+          updateGuessDto.player_guess === choice.guess_player_choice;
+      }
     }
 
     //update the score
@@ -79,17 +77,16 @@ export class GuessService {
       updatedGuess.home_guess_isCorrect &&
       updatedGuess.home_guess_isCorrect
     ) {
-      const gameState = await this.updateRoundNumber(
+      const gameState = await this.checkGameRoundState(
         updatedGuess.round_id,
-        true,
       );
       return gameState;
     }
     return updatedGuess.toJSON();
   }
 
-  updateRoundNumber(roundId: string, value: boolean) {
-    return this.roundService.canUpdateRoundNumber(roundId, value);
+  checkGameRoundState(roundId: string) {
+    return this.roundService.checkGameState(roundId);
   }
 
   async getScore(roundId: string) {

@@ -27,8 +27,13 @@ export class GameService {
     return (await newGame.save()).id;
   }
 
-  findAll() {
-    return `This action returns all game`;
+ async generateOptions(data: any) {
+    return await this.roundService.createRound({
+      gamesession_id: data.gamesession_id,
+      category: data.category,
+      number_of_proposals: data.number_of_proposals,
+      round_number: data.round_number,
+    });
   }
 
   async findOneUser(id: string) {
@@ -95,6 +100,7 @@ export class GameService {
         }
 
         const data = {
+          id: round.gamesession_id,
           home_player_score: roundScore.home_player_score,
           guess_player_score: roundScore.guess_player_score,
           winner,

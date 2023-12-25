@@ -29,22 +29,33 @@ export class GameRoundService {
       round_number: createGameRoundDto.round_number,
       number_of_proposals,
       category,
+      gamesession_id: createGameRoundDto.gamesession_id,
     });
 
-    if (createGameRoundDto.round_number > 1) {
-      const existingGame = await this.update(createGameRoundDto.id, {
-        number_of_proposals: createGameRoundDto.number_of_proposals,
-        round_number: createGameRoundDto.round_number,
-        category: createGameRoundDto.category,
-        proposals: createGameRoundDto.proposals,
-        gamesession_id: createGameRoundDto.gamesession_id,
-      });
-      if (existingGame) return { ...existingGame, proposals: values };
-    }
+    // if (createGameRoundDto.round_number > 1) {
+    //   const existingGame = await this.update(createGameRoundDto.id, {
+    //     number_of_proposals: createGameRoundDto.number_of_proposals,
+    //     round_number: createGameRoundDto.round_number,
+    //     category: createGameRoundDto.category,
+    //     proposals: JSON.stringify(values),
+    //     gamesession_id: createGameRoundDto.gamesession_id,
+    //   });
+    //   if (existingGame) return { ...existingGame, proposals: JSON.parse(existingGame.proposals) };
+    // }else {
 
-    const newRound = await rowToStore.save();
+      if(rowToStore.round_number <= 5 && rowToStore.round_number>0) {
+        const newRound = await rowToStore.save();
+        return { ...newRound, proposals: JSON.parse(newRound.proposals) };
+      }else {
+        console.log("only 5 rounds are allowed");
+      return null;
+      }
+      
 
-    return { round_id: newRound.id, values };
+     
+    // }
+
+   
   }
 
   findAll() {
@@ -79,13 +90,11 @@ export class GameRoundService {
     return arr[index];
   };
 
-  async canUpdateRoundNumber(id: string, value: boolean) {
+  async checkGameState(id: string) {
     const round = await this.gameroundModel.findByPk(id);
-    if (round && value && round.round_number !== 5) {
-      round.round_number += 1;
-    } else if (round && round.round_number === 5) {
+    if (round && round.round_number === 5) {
       return 'game ended';
     }
-    return await round.save();
+   
   }
 }

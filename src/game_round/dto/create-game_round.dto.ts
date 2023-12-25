@@ -20,7 +20,7 @@ export class CreateGameRoundDto {
   @IsNotEmpty()
   number_of_proposals: number;
 
-  @IsNumber()
-  @IsNotEmpty()
-  proposals: string;
+  // @IsNumber()
+  // @IsNotEmpty()
+  // proposals: string;
 }
