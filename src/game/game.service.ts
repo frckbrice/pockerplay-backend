@@ -57,17 +57,21 @@ export class GameService {
   async registerGuessPlayer(id: string, updateGameDto?: UpdateGameDto) {
     const existingGame = await this.gameModel.findByPk(id);
     console.log('in registerGuessPlayer', updateGameDto);
-    if (existingGame) {
-      if (!existingGame.guess_player_id && updateGameDto.guess_player_id) {
+    if (
+      existingGame &&
+      existingGame.home_player_id !== updateGameDto.guess_player_id
+    ) {
+      if (!existingGame.guess_player_id) {
         console.log('no guess player in update game');
         existingGame.guess_player_id = updateGameDto?.guess_player_id;
-
-        const homePlayer = await this.userService.findOne(
-          existingGame.home_player_id,
-        );
-
         const existGame = await existingGame.save();
-        return { homePlayer, existGame };
+        const homePlayer = await this.userService.findOne(
+          existGame.home_player_id,
+        );
+        const guessPlayer = await this.userService.findOne(
+          existGame.guess_player_id,
+        );
+        return { homePlayer, existGame, guessPlayer };
       }
     }
   }
