@@ -42,14 +42,20 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { [value: string]: string },
     @ConnectedSocket() client: Socket,
   ) {
-    client.join(data.gameSession_id);
-    await this.gameService.update(data.gameSession_id, {
-      guess_player_id: data.guess_player_id,
-    });
-    const player = await this.gameService.findOneUser(data.guess_player_id)
-    this.server
-      .to(data.gameSession_id)
-      .emit('notify', `🟢 ${player.username} is connected`);
+    if (data) {
+      client.join(data?.gameSession_id);
+      if (data?.guess_player_id) {
+        await this.gameService.update(data?.gameSession_id, {
+          guess_player_id: data?.guess_player_id,
+        });
+        const player = await this.gameService.findOneUser(
+          data?.guess_player_id,
+        );
+        this.server
+          .to(data.gameSession_id)
+          .emit('notify', `🟢 ${player.username} is connected`);
+      }
+    }
   }
 
   async handleEndGame(
@@ -81,8 +87,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('send_choice')
   async handlesendingChoice(@MessageBody() data: GameType) {
-    
-   const choicemade = await this.gameService.handleGameData(data);
+    const choicemade = await this.gameService.handleGameData(data);
     this.server.to(data.gamesession_id).emit('receive_choice', {
       proposals: data.proposals,
       message: data.message_hint,
