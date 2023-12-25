@@ -54,6 +54,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       notify: `🟢 ${player.username} is connected`,
       role: gameUpdate.existGame ? "guess_player" : "home_player",
       homePlayer: gameUpdate.homePlayer,
+      guessPlayer: gameUpdate.guessPlayer
     }
     this.server
       .to(data?.gameSession_id)
@@ -108,21 +109,25 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: GameGuessType,
     @ConnectedSocket() client: Socket,
   ) {
-    const gameState = await this.gameService.handleGuessData(data);
-    if (gameState === 'end game') {
-      const endG = await this.gameService.endGame(data.round_id);
-      this.handleEndGame(client, {gameSession_id: data.gamesession_id});
-      return this.server.to(data.gamesession_id).emit('endGame', {
+    if(data.role=== "home_player") {
+      const gameState = await this.gameService.handleUpdateGuess(data);
+      if (gameState.gameState === 'endofgame') {
+        const endG = await this.gameService.endGame(data.round_id);
+        this.handleEndGame(client, {gameSession_id: data.gamesession_id});
+        return this.server.to(data.gamesession_id).emit('endGame', {
+          guess: data.player_guess,
+          role: data.role,
+          gameState,
+          game: endG,
+        });
+    } 
+    }else if(data.role === "guess_player") {
+      await this.gameService.handlecreateGuess(data);
+      return this.server.to(data.gamesession_id).emit('receive_guess', {
         guess: data.player_guess,
         role: data.role,
-        gameState,
-        game: endG,
       });
-      
     }
-    return this.server.to(data.gamesession_id).emit('receive_guess', {
-      guess: data.player_guess,
-      role: data.role,
-    });
+    
   }
 }

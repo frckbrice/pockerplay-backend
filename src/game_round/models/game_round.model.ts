@@ -36,7 +36,7 @@ export class GameRound extends Model {
   @Column
   proposals: string;
 
-  @Column({defaultValue: 0})
+  @Column({defaultValue: 1})
   round_number: number;
 
   @Column({defaultValue: 5})

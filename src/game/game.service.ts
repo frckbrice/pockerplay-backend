@@ -9,6 +9,7 @@ import { UsersService } from 'src/users/users.service';
 import { ChoiceService } from 'src/choice/choice.service';
 import { GuessService } from 'src/guess/guess.service';
 import { GameRoundService } from 'src/game_round/game_round.service';
+import User from 'src/users/models/user.model';
 
 @Injectable()
 export class GameService {
@@ -45,30 +46,32 @@ export class GameService {
     const existingGame = await this.gameModel.findByPk(id);
     console.log('in the update game', updateGameDto);
 
-      if (existingGame && existingGame.guess_player_id) {
-        console.log('end the game in update game');
-        existingGame.home_player_score = updateGameDto?.home_player_score;
-        existingGame.guess_player_score = updateGameDto?.guess_player_score;
-        existingGame.winner = updateGameDto?.winner;
-        return await existingGame.save();
-      }
-    
+    if (existingGame && existingGame.guess_player_id) {
+      console.log('end the game in update game');
+      existingGame.home_player_score = updateGameDto?.home_player_score;
+      existingGame.guess_player_score = updateGameDto?.guess_player_score;
+      existingGame.winner = updateGameDto?.winner;
+      return await existingGame.save();
+    }
   }
 
   async registerGuessPlayer(id: string, updateGameDto?: UpdateGameDto) {
     const existingGame = await this.gameModel.findByPk(id);
     console.log('in registerGuessPlayer', updateGameDto);
-    if (existingGame) {
-      if (!existingGame.guess_player_id && updateGameDto.guess_player_id) {
+    if (existingGame && existingGame.home_player_id !== updateGameDto.guess_player_id) {
+      if (!existingGame.guess_player_id ) {
         console.log('no guess player in update game');
         existingGame.guess_player_id = updateGameDto?.guess_player_id;
 
+        const existGame = await existingGame.save();
         const homePlayer = await this.userService.findOne(
-          existingGame.home_player_id,
+          existGame.home_player_id,
         );
 
-        const existGame = await existingGame.save();
-        return { homePlayer, existGame };
+        const guessPlayer = await this.userService.findOne(
+          existGame.guess_player_id,
+        );
+        return { homePlayer, existGame, guessPlayer };
       }
     }
   }
@@ -149,7 +152,7 @@ export class GameService {
     // }
   }
 
-  async handleGuessData(data: GameGuessType) {
+  async handleUpdateGuess(data: GameGuessType) {
     if (data.role === 'home_player') {
       const homeGuesses = {
         choice_id: data.choice_id,
@@ -159,7 +162,11 @@ export class GameService {
       };
 
       return await this.guessService.update(data.choice_id, homeGuesses);
-    } else if (data.role === 'guess_player') {
+    }
+  }
+
+  async handlecreateGuess(data: GameGuessType) {
+    if (data.role === 'guess_player') {
       const guessGuesses = {
         choice_id: data.choice_id,
         guess_player_guess: data.player_guess,
@@ -169,5 +176,22 @@ export class GameService {
 
       return await this.guessService.create(guessGuesses);
     }
+  }
+
+  async getAllMyGames(myId:string) {
+    const allGameIds = (await this.gameModel.findAll({
+      where: {
+        home_player_id: myId,
+      },
+    })).map((data) =>data.guess_player_id);
+
+
+    const allMyGuesses =await  Promise.all(allGameIds.map(async(id) =>{
+        const user = await this.userService.findOne(id);
+        if(user) return user;
+    }))
+
+    if(allMyGuesses.length) return allMyGuesses;
+
   }
 }
