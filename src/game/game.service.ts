@@ -44,21 +44,26 @@ export class GameService {
     // const newID = UUIDV4(id);
     const existingGame = await this.gameModel.findByPk(id);
     console.log('in the update game', updateGameDto);
-    if (
-      existingGame &&
-      !existingGame.guess_player_id &&
-      updateGameDto.guess_player_id
-    ) {
-      console.log('no guess player in update game');
-      existingGame.guess_player_id = updateGameDto?.guess_player_id;
-    } else if (existingGame && existingGame.guess_player_id) {
-      console.log('end the game in update game');
-      existingGame.home_player_score = updateGameDto?.home_player_score;
-      existingGame.guess_player_score = updateGameDto?.guess_player_score;
-      existingGame.winner = updateGameDto?.winner;
-    }
+    if(existingGame) {
+      if (
+      
+        !existingGame.guess_player_id &&
+        updateGameDto.guess_player_id
+      ) {
+        console.log('no guess player in update game');
+        existingGame.guess_player_id = updateGameDto?.guess_player_id;
+      } else if (existingGame && existingGame.guess_player_id) {
+        console.log('end the game in update game');
+        existingGame.home_player_score = updateGameDto?.home_player_score;
+        existingGame.guess_player_score = updateGameDto?.guess_player_score;
+        existingGame.winner = updateGameDto?.winner;
+      }
+      return await existingGame.save();
 
-    return (await existingGame.save()).toJSON();
+    }
+   
+
+    
   }
 
   async endGame(roundId: string) {
