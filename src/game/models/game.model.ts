@@ -7,7 +7,7 @@ import {
   BelongsTo,
   HasMany,
 } from 'sequelize-typescript';
-import { GameRound } from 'src/game_round/models/game_round.model';
+import { GameRound } from 'src/gameRound/models/gameRound.model';
 import User from 'src/users/models/user.model';
 
 @Table({ timestamps: true, tableName: 'gamesession', freezeTableName: true })
@@ -34,10 +34,10 @@ export class GameSession extends Model {
   // @Column
   // score: Score;
 
-  @Column({ type: DataType.NUMBER, defaultValue: 0 })
+  @Column({ defaultValue: 0 })
   home_player_score: number;
 
-  @Column({ type: DataType.NUMBER, defaultValue: 0 })
+  @Column({ defaultValue: 0 })
   guess_player_score: number;
 
   // @Column

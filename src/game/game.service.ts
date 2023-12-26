@@ -1,14 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { GameSession } from './models/game.model';
 import { GameGuessType, GameType } from './interface/game.interface';
 import { UsersService } from 'src/users/users.service';
-import { v4 as UUIDV4 } from 'uuid';
+
 import { ChoiceService } from 'src/choice/choice.service';
 import { GuessService } from 'src/guess/guess.service';
-import { GameRoundService } from 'src/game_round/game_round.service';
+import { GameRoundService } from 'src/gameRound/game_round.service';
+// import User from 'src/users/models/user.model';
 
 @Injectable()
 export class GameService {
@@ -20,15 +21,40 @@ export class GameService {
     private roundService: GameRoundService,
   ) {}
   async create(createGameDto: CreateGameDto) {
-    const newGame = new this.gameModel({
-      home_player_id: createGameDto.home_player_id,
-    });
+    // const newGame = new this.gameModel({
+    //   home_player_id: createGameDto.home_player_id,
+    // });
 
-    return (await newGame.save()).id;
+    // return (await newGame.save()).id;
+
+    const existGames = await this.gameModel.findAll({
+      where: {
+        home_player_id: createGameDto.home_player_id,
+        guess_player_id: null,
+      },
+      order: [['createdAt', 'desc']],
+    });
+    console.log('all the players: ', existGames);
+    if (existGames.length <= 2) {
+      const newGame = new this.gameModel({
+        home_player_id: createGameDto.home_player_id,
+      });
+      const game = await newGame.save();
+      return { game: game.id, state: 'new game' };
+    } else
+      return {
+        games: [existGames[0].id, existGames[1].id],
+        state: 'pending game',
+      };
   }
 
-  findAll() {
-    return `This action returns all game`;
+  async generateOptions(data: any) {
+    return await this.roundService.createRound({
+      gamesession_id: data.gamesession_id,
+      category: data.category,
+      number_of_proposals: data.number_of_proposals,
+      round_number: data.round_number,
+    });
   }
 
   async findOneUser(id: string) {
@@ -38,26 +64,52 @@ export class GameService {
   async update(id: string, updateGameDto?: UpdateGameDto) {
     // const newID = UUIDV4(id);
     const existingGame = await this.gameModel.findByPk(id);
-    if (existingGame) {
-      if (updateGameDto?.guess_player_id && !existingGame.guess_player_id)
-        existingGame.guess_player_id = updateGameDto?.guess_player_id;
-      else {
-        existingGame.home_player_score = updateGameDto?.home_player_score;
-        existingGame.guess_player_score = updateGameDto?.guess_player_score;
-        existingGame.winner = updateGameDto?.winner;
-      }
+    console.log('in the update game', updateGameDto);
 
-      return (await existingGame.save()).toJSON();
+    if (existingGame && existingGame.guess_player_id) {
+      console.log('end the game in update game');
+      existingGame.home_player_score = updateGameDto?.home_player_score;
+      existingGame.guess_player_score = updateGameDto?.guess_player_score;
+      existingGame.winner = updateGameDto?.winner;
+      return await existingGame.save();
     }
-
-    return `This action updates a #${id} game`;
   }
 
-  async endGame(gameId: string, roundId: string) {
-    const existingGame = await this.gameModel.findByPk(gameId);
+  async registerGuessPlayer(id: string, updateGameDto?: UpdateGameDto) {
+    // console.log('registerGuessPlayer: ', id, updateGameDto);
+    const existingGame = await this.gameModel.findByPk(id);
+    // console.log('existing game', existingGame);
     if (existingGame) {
-      const round = await this.roundService.findOne(roundId);
+      if (existingGame.home_player_id === updateGameDto.guess_player_id) {
+        console.log('yes game exists and is home player connected');
+        return { existingGame, guessPlayer: 'notconnected' };
+      } else {
+        console.log('check if guess player is registered yet');
 
+        if (!existingGame.guess_player_id) {
+          existingGame.guess_player_id = updateGameDto?.guess_player_id;
+          const existGame = await existingGame.save();
+
+          const homePlayer = await this.userService.findOne(
+            existGame.home_player_id,
+          );
+          const guessPlayer = await this.userService.findOne(
+            existGame.guess_player_id,
+          );
+          return { homePlayer, existGame, guessPlayer };
+        }
+      }
+    }
+  }
+
+  async endGame(roundId: string) {
+    console.log('in end game method');
+    let winner: string = '';
+    const round = await this.roundService.findOne(roundId);
+    if (round && round.round_number === 5) {
+      console.log('in end game method, the round', round);
+      const { gamesession_id } = round;
+      const existingGame = await this.gameModel.findByPk(gamesession_id);
       const roundScore = await this.guessService.getScore(roundId);
 
       const home_player = await this.userService.findOne(
@@ -68,17 +120,33 @@ export class GameService {
         existingGame.guess_player_id,
       );
 
-      if (roundScore && round) {
-        existingGame.home_player_score = roundScore.home_player_score;
-        existingGame.guess_player_score = roundScore.guess_player_score;
+      if (roundScore && existingGame && home_player && guess_player) {
+        console.log(
+          'in end game method, the score, player, game',
+          roundScore,
+          existingGame.id,
+          home_player.username,
+          guess_player.username,
+        );
+
+        // existingGame.home_player_score = roundScore.home_player_score;
+        // existingGame.guess_player_score = roundScore.guess_player_score;
 
         if (roundScore.home_player_score > roundScore.guess_player_score) {
-          existingGame.winner = home_player.username;
+          winner = home_player.username;
         } else if (
           roundScore.home_player_score < roundScore.guess_player_score
         ) {
-          existingGame.winner = guess_player.username;
+          winner = guess_player.username;
         }
+
+        const data = {
+          id: round.gamesession_id,
+          home_player_score: roundScore.home_player_score,
+          guess_player_score: roundScore.guess_player_score,
+          winner,
+        };
+        return await this.update(gamesession_id, data);
       }
       return await existingGame.save();
     }
@@ -110,7 +178,7 @@ export class GameService {
     // }
   }
 
-  async handleGuessData(data: GameGuessType) {
+  async handleUpdateGuess(data: GameGuessType) {
     if (data.role === 'home_player') {
       const homeGuesses = {
         choice_id: data.choice_id,
@@ -120,7 +188,11 @@ export class GameService {
       };
 
       return await this.guessService.update(data.choice_id, homeGuesses);
-    } else if (data.role === 'guess_player') {
+    }
+  }
+
+  async handlecreateGuess(data: GameGuessType) {
+    if (data.role === 'guess_player') {
       const guessGuesses = {
         choice_id: data.choice_id,
         guess_player_guess: data.player_guess,
@@ -130,5 +202,26 @@ export class GameService {
 
       return await this.guessService.create(guessGuesses);
     }
+  }
+
+  async getAllMyGames(myId: string) {
+    console.log(' in getAllMyGames id is:  ', myId);
+    const allGameIds = (
+      await this.gameModel.findAll({
+        where: {
+          home_player_id: myId,
+        },
+      })
+    ).map((data) => data.guess_player_id);
+
+    const allMyGuesses = await Promise.all(
+      allGameIds.map(async (id) => {
+        const user = await this.userService.findOne(id);
+        if (user) return user;
+      }),
+    );
+
+    if (allMyGuesses.length) return allMyGuesses;
+    else return [];
   }
 }

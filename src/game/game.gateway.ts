@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { GameService } from './game.service';
 import { CreateGameDto } from './dto/create-game.dto';
-import { UpdateGameDto } from './dto/update-game.dto';
+// import { UpdateGameDto } from './dto/update-game.dto';
 import { Socket, Server } from 'socket.io';
 import { GameGuessType, GameType } from './interface/game.interface';
 
@@ -22,7 +22,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(`user ${client.id} has connected`);
   }
 
-  handleDisconnect(client: Socket, ...args: any[]): any {
+  handleDisconnect(client: Socket): any {
     client.leave(client.id);
     console.log(`user ${client.id} disconnected`);
   }
@@ -33,8 +33,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     const newgame = await this.gameService.create(createGameDto);
-    if (newgame) client.join(newgame);
-    this.server.to(createGameDto.home_player_id).emit('initgame', newgame);
+    if (newgame.state === 'new game') {
+      client.join(newgame.game);
+      this.server.to(newgame.game).emit('init', newgame);
+    } else {
+      client.join(createGameDto.home_player_id);
+      this.server.to(createGameDto.home_player_id).emit('init', newgame.games);
+    }
   }
 
   @SubscribeMessage('joingame')
@@ -42,22 +47,40 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { [value: string]: string },
     @ConnectedSocket() client: Socket,
   ) {
-    client.join(data.gameSession_id);
-    await this.gameService.update(data.gameSession_id, {
-      guess_player_id: data.guess_player_id,
-    });
-    this.server
-      .to(data.gameSession_id)
-      .emit('notify', `🟢 ${data.player} is connected`);
-    return this.gameService.findAll();
+    console.log(data);
+    if (data && data.playerId) {
+      client.join(data?.gamesession_id);
+      const gameUpdate = await this.gameService.registerGuessPlayer(
+        data?.gamesession_id,
+        {
+          guess_player_id: data.playerId,
+        },
+      );
+      const player = await this.gameService.findOneUser(data?.playerId);
+      console.log(gameUpdate);
+      if (gameUpdate?.existGame) {
+        const notification = {
+          notify: `🟢 ${player.username}`,
+          role: gameUpdate.existGame ? 'guess_player' : 'home_player',
+          homePlayer: gameUpdate.homePlayer,
+          guessPlayer: gameUpdate.guessPlayer,
+        };
+        return this.server.to(data.gamesession_id).emit('notify', notification);
+      } else if (gameUpdate?.guessPlayer === 'notconnected') {
+        const notification = {
+          notify: `🔴 Guess not connected`,
+          role: 'home_player',
+        };
+        return this.server.to(data.gamesession_id).emit('notify', notification);
+      }
+    }
   }
 
-  @SubscribeMessage('endgame')
   async handleEndGame(
-    @MessageBody() data: { [value: string]: string },
     @ConnectedSocket() client: Socket,
+    @MessageBody() data?: { gamesession_id: string },
   ) {
-    client.leave(data.gameSession_id);
+    client.leave(data.gamesession_id);
     this.handleDisconnection(data, client);
   }
 
@@ -68,42 +91,66 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const player = await this.gameService.findOneUser(data.player_id);
     this.server
-      .to(data.gamesession)
+      .to(data.gamesession_id)
       .emit('disconnected', `🔴 ${data?.player} disconnected`);
     this.handleDisconnect(client);
     console.log(`The user  ${player.username} has disconnected`);
   }
 
-  // @SubscribeMessage('updateGame')
-  async update(@MessageBody() updateGameDto: UpdateGameDto) {
-    return await this.gameService.update(updateGameDto.id, updateGameDto);
+  @SubscribeMessage('generate')
+  async update(
+    @MessageBody() data: { [value: string]: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.join(data.home_player_id);
+    const round = await this.gameService.generateOptions(data);
+    console.log('round in gate ways: ', round);
+    return this.server.to(data.home_player_id).emit('round', {
+      round: round.dataValues,
+      proposals: round.proposals,
+    });
   }
 
   @SubscribeMessage('send_choice')
   async handlesendingChoice(@MessageBody() data: GameType) {
-    this.server.to(data.gamesession_id).emit('receive_data', {
-      proposal: data.proposals,
+    const choicemade = await this.gameService.handleGameData(data);
+    this.server.to(data.gamesession_id).emit('receive_choice', {
+      proposals: data.proposals,
       message: data.message_hint,
+      role: data.role,
+      choice: choicemade.id,
     });
-    await this.gameService.handleGameData(data);
   }
 
   @SubscribeMessage('send_guess')
-  async handlesendingGuess(@MessageBody() data: GameGuessType) {
-    const gameState = await this.gameService.handleGuessData(data);
-    if (gameState === 'end game') {
-      const endG = await this.gameService.endGame(
-        data.gamesession_id,
-        data.round_id,
-      );
-      return this.server.to(data.gamesession_id).emit('endGame', {
+  async handlesendingGuess(
+    @MessageBody() data: GameGuessType,
+    @ConnectedSocket() client: Socket,
+  ) {
+    if (data.role === 'home_player') {
+      const gameState = await this.gameService.handleUpdateGuess(data);
+      if (gameState.gameState === 'endofgame') {
+        const endG = await this.gameService.endGame(data.round_id);
+        this.handleEndGame(client, { gamesession_id: data.gamesession_id });
+        return this.server.to(data.gamesession_id).emit('endGame', {
+          guess: data.player_guess,
+          role: data.role,
+          gameState,
+          game: endG,
+        });
+      }
+    } else if (data.role === 'guess_player') {
+      await this.gameService.handlecreateGuess(data);
+      return this.server.to(data.gamesession_id).emit('receive_guess', {
         guess: data.player_guess,
-        gameState,
-        game: endG,
+        role: data.role,
       });
     }
-    return this.server.to(data.gamesession_id).emit('receive_data', {
-      guess: data.player_guess,
-    });
+  }
+
+  @SubscribeMessage('myDM')
+  async getAllmyDM(@MessageBody() data: { [id: string]: string }) {
+    const myDMs = await this.gameService.getAllMyGames(data.id);
+    return this.server.to(data.gamesession_id).emit('myDM', myDMs);
   }
 }

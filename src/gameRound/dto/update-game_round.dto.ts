@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateGameRoundDto } from './create-game_round.dto';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateGameRoundDto extends PartialType(CreateGameRoundDto) {
   @IsString()
@@ -14,10 +14,6 @@ export class UpdateGameRoundDto extends PartialType(CreateGameRoundDto) {
   @IsNumber()
   @IsOptional()
   round_number: number;
-
-  @IsNumber()
-  @IsNotEmpty()
-  proposals: string;
 
   @IsString()
   @IsOptional()

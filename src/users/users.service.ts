@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+// import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import User from './models/user.model';
-import { v4 as UUIDV4 } from 'uuid';
 
 @Injectable()
 export class UsersService {
@@ -14,13 +13,21 @@ export class UsersService {
       where: { email: createUserDto.email },
     });
 
-    if (existingUser) return existingUser;
-    const newUser = new this.userModel({
-      username: createUserDto.username,
-      image: createUserDto.image,
-      email: createUserDto.email,
-    });
-    return await newUser.save();
+    if (existingUser) {
+      console.log('existing user', existingUser);
+      return existingUser;
+    } else {
+      console.log('not existing user');
+      const newUser = new this.userModel({
+        username: createUserDto.username,
+        image: createUserDto.image,
+        email: createUserDto.email,
+      });
+
+      const storedUser = await newUser.save();
+      console.log(storedUser);
+      return storedUser;
+    }
   }
 
   findAll() {
@@ -31,9 +38,9 @@ export class UsersService {
     return await this.userModel.findByPk(id);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+  // update(id: number, updateUserDto: UpdateUserDto) {
+  //   return `This action updates a #${id} user`;
+  // }
 
   remove(id: number) {
     return `This action removes a #${id} user`;
