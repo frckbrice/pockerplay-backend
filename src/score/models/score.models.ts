@@ -6,7 +6,7 @@ import {
   BelongsTo,
   ForeignKey,
 } from 'sequelize-typescript';
-import { GameRound } from 'src/game_round/models/game_round.model';
+import { GameRound } from 'src/gameRound/models/gameRound.model';
 
 @Table({
   freezeTableName: true,

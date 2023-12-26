@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { CreateGameRoundDto } from './dto/create-game_round.dto';
 import { UpdateGameRoundDto } from './dto/update-game_round.dto';
-import { GameRound } from './models/game_round.model';
+import { GameRound } from './models/gameRound.model';
 import { InjectModel } from '@nestjs/sequelize';
-import { randomWords, images } from 'utils/data';
+import { randomWords, randomimages } from 'utils/data';
 
 @Injectable()
 export class GameRoundService {
@@ -11,6 +11,8 @@ export class GameRoundService {
     @InjectModel(GameRound) private gameroundModel: typeof GameRound,
   ) {}
   async createRound(createGameRoundDto: CreateGameRoundDto) {
+    console.log('create round data: ', createGameRoundDto);
+
     const { category, number_of_proposals } = createGameRoundDto;
     const values: string[] = [];
     if (category === 'words') {
@@ -18,34 +20,27 @@ export class GameRoundService {
         values.push(this.randomValue(randomWords));
       }
     }
-    if (category === 'images') {
+    if (category === 'Images') {
       for (let i = 0; i <= number_of_proposals - 1; i++) {
-        values.push(this.randomValue(images));
+        values.push(this.randomValue(randomimages));
       }
     }
-
+    console.log('value to return: ', values);
     const rowToStore = new this.gameroundModel({
-      proposals: JSON.stringify(values),
+      // proposals: !(values.length > 10000)
+      //   ? JSON.stringify(values)
+      //   : 'data too for this column',
       round_number: createGameRoundDto.round_number,
       number_of_proposals,
       category,
       gamesession_id: createGameRoundDto.gamesession_id,
     });
 
-    // if (createGameRoundDto.round_number > 1) {
-    //   const existingGame = await this.update(createGameRoundDto.id, {
-    //     number_of_proposals: createGameRoundDto.number_of_proposals,
-    //     round_number: createGameRoundDto.round_number,
-    //     category: createGameRoundDto.category,
-    //     proposals: JSON.stringify(values),
-    //     gamesession_id: createGameRoundDto.gamesession_id,
-    //   });
-    //   if (existingGame) return { ...existingGame, proposals: JSON.parse(existingGame.proposals) };
-    // }else {
-
     if (rowToStore.round_number <= 5 && rowToStore.round_number > 0) {
       const newRound = await rowToStore.save();
-      return { ...newRound, proposals: JSON.parse(newRound.proposals) };
+      console.log('this is round generated: ', newRound);
+      // return { ...newRound, proposals: JSON.parse(newRound.proposals) };
+      return { ...newRound, proposals: values };
     } else {
       console.log('only 5 rounds are allowed');
       return null;
@@ -86,10 +81,9 @@ export class GameRoundService {
     return arr[index];
   };
 
-  async checkGameState(id: string) {
+  async getRoundNumber(id: string) {
     const round = await this.gameroundModel.findByPk(id);
-    if (round && round.round_number === 5) {
-      return 'game ended';
-    }
+
+    return round ? round.round_number : 1;
   }
 }

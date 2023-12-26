@@ -6,7 +6,7 @@ import { Guess } from './models/guess.model';
 import { GameGuessType } from 'src/game/interface/game.interface';
 import { ChoiceService } from 'src/choice/choice.service';
 import { ScoreService } from 'src/score/score.service';
-import { GameRoundService } from 'src/game_round/game_round.service';
+import { GameRoundService } from 'src/gameRound/game_round.service';
 
 @Injectable()
 export class GuessService {
@@ -48,45 +48,40 @@ export class GuessService {
     return `This action returns a #${id} guess`;
   }
 
-  async update(id: string, updateGuessDto: GameGuessType) {
-    const checkGuess = await this.guessModel.findByPk(id);
+  async update(id: string, updateGuessDto: any) {
+    const checkGuess = await this.guessModel.findOne({
+      where: {
+        choice_id: id,
+      },
+    });
 
     if (checkGuess) {
       const choice = await this.choiceService.findChoice(checkGuess.choice_id);
       if (choice) {
         checkGuess.choice_id = choice.id;
-        checkGuess.home_player_guess = updateGuessDto.player_guess;
-        checkGuess.home_player_id = updateGuessDto.player_id;
+        checkGuess.home_player_guess = updateGuessDto.home_player_guess;
+        checkGuess.home_player_id = updateGuessDto.home_player_id;
         checkGuess.round_id = updateGuessDto.round_id;
         checkGuess.home_guess_isCorrect =
           updateGuessDto.player_guess === choice.guess_player_choice;
       }
+      //update the score
+      if (checkGuess.home_guess_isCorrect)
+        await this.scoreService.update(checkGuess.round_id, {
+          home_player_isCorrect: checkGuess.home_guess_isCorrect,
+        });
+
+      const updatedGuess = await checkGuess.save();
+      const roundScore = await this.getScore(updatedGuess.round_id);
+      const roundNumber = await this.checkGameRoundState(updatedGuess.round_id);
+      //check game state
+      if (roundNumber === 5) return { gameState: 'endofgame', roundScore };
+      else return { gameState: 'continue', roundScore };
     }
-
-    //update the score
-    if (checkGuess.home_guess_isCorrect)
-      await this.scoreService.update(checkGuess.round_id, {
-        home_player_isCorrect: checkGuess.home_guess_isCorrect,
-      });
-
-    const updatedGuess = await checkGuess.save();
-
-    //update the round number
-    if (
-      updatedGuess &&
-      updatedGuess.home_guess_isCorrect &&
-      updatedGuess.home_guess_isCorrect
-    ) {
-      const gameState = await this.checkGameRoundState(
-        updatedGuess.round_id,
-      );
-      return gameState;
-    }
-    return updatedGuess.toJSON();
   }
 
   checkGameRoundState(roundId: string) {
-    return this.roundService.checkGameState(roundId);
+    return this.roundService.getRoundNumber(roundId);
   }
 
   async getScore(roundId: string) {
