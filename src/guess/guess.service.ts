@@ -75,7 +75,7 @@ export class GuessService {
       const roundScore = await this.getScore(updatedGuess.round_id);
       const roundNumber = await this.checkGameRoundState(updatedGuess.round_id);
       //check game state
-      if (roundNumber === 5) return {gameState: "endofgame", roundScore};
+      if (roundNumber === 5) return {gameState: "END", roundScore};
       else return {gameState: "continue",roundScore}
     }
   }
