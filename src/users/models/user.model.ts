@@ -14,11 +14,14 @@ export default class User extends Model {
   @Column({ allowNull: false })
   username: string;
 
-  @Column({ allowNull: false })
-  email: string;
+  // @Column({ type: DataType.NUMBER, defaultValue: 0, autoIncrement: true })
+  // badge: number;
 
-  @Column({ allowNull: false })
-  image: string;
+  // @Column({ allowNull: false })
+  // email: string;
+
+  // @Column({ allowNull: false })
+  // image: string;
 
   @HasMany(() => GameSession)
   games: GameSession[];

@@ -9,24 +9,15 @@ export class UsersService {
   constructor(@InjectModel(User) private userModel: typeof User) {}
 
   async create_user(createUserDto: CreateUserDto) {
-    const existingUser = await this.userModel.findOne({
-      where: { email: createUserDto.email },
+    const existingUser = new this.userModel({
+      username: createUserDto.username,
     });
 
-    if (existingUser) {
+    const newUser = await existingUser.save();
+
+    if (newUser) {
       console.log('existing user', existingUser);
       return existingUser;
-    } else {
-      console.log('not existing user');
-      const newUser = new this.userModel({
-        username: createUserDto.username,
-        image: createUserDto.image,
-        email: createUserDto.email,
-      });
-
-      const storedUser = await newUser.save();
-      console.log(storedUser);
-      return storedUser;
     }
   }
 
