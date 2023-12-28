@@ -204,7 +204,7 @@ export class GameService {
     }
   }
 
-  async getAllMyGames(myId: string) {
+   async getAllMyGames(myId: string) {
     console.log(' in getAllMyGames id is:  ', myId);
     if (myId) {
       const allGameIds = (
@@ -214,16 +214,17 @@ export class GameService {
           },
         })
       ).map((data) => data.guess_player_id);
+      if (allGameIds.length > 0) {
+        const allMyGuesses = await Promise.all(
+          allGameIds.map(async (id) => {
+            const user = await this.userService.findOne(id);
+            if (user) return user;
+          }),
+        );
 
-      const allMyGuesses = await Promise.all(
-        allGameIds.map(async (id) => {
-          const user = await this.userService.findOne(id);
-          if (user) return user;
-        }),
-      );
-
-      if (allMyGuesses.length) return allMyGuesses;
-      else return [];
+        if (allMyGuesses.length) return allMyGuesses;
+        else return [];
+      }
     } else return [];
   }
 }
