@@ -113,6 +113,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('send_choice')
   async handlesendingChoice(@MessageBody() data: GameType) {
+    console.log('choices rececived: ', data);
     const choicemade = await this.gameService.handleGameData(data);
     this.server.to(data.gamesession_id).emit('receive_choice', {
       proposals: data.proposals,
@@ -127,6 +128,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: GameGuessType,
     @ConnectedSocket() client: Socket,
   ) {
+    console.log('guess rececived: ', data);
     if (data.role === 'home_player') {
       const gameState = await this.gameService.handleUpdateGuess(data);
       if (gameState.gameState === 'endofgame') {
