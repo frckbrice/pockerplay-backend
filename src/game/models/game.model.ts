@@ -7,7 +7,7 @@ import {
   BelongsTo,
   HasMany,
 } from 'sequelize-typescript';
-import { GameRound } from 'src/game_round/models/game_round.model';
+import { GameRound } from 'src/gameRound/models/gameRound.model';
 import User from 'src/users/models/user.model';
 
 @Table({ timestamps: true, tableName: 'gamesession', freezeTableName: true })

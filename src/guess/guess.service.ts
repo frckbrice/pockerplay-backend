@@ -6,7 +6,7 @@ import { Guess } from './models/guess.model';
 import { GameGuessType } from 'src/game/interface/game.interface';
 import { ChoiceService } from 'src/choice/choice.service';
 import { ScoreService } from 'src/score/score.service';
-import { GameRoundService } from 'src/game_round/game_round.service';
+import { GameRoundService } from 'src/gameRound/game_round.service';
 
 @Injectable()
 export class GuessService {

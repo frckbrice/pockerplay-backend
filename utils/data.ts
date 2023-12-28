@@ -33,7 +33,7 @@ export const randomWords = [
   `${faker.word.noun()}`,
 ];
 
-export const images = [
+export const randomimages = [
   `${faker.image.urlLoremFlickr({ category: 'animals' })}`,
   `${faker.image.urlLoremFlickr({ category: 'business' })}`,
   `${faker.image.urlLoremFlickr({ category: 'cats' })}`,

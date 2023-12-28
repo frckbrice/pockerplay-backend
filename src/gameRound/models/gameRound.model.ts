@@ -1,3 +1,4 @@
+import { DataTypes } from 'sequelize';
 import {
   Table,
   Model,
@@ -13,7 +14,7 @@ import {
 import { GameSession } from 'src/game/models/game.model';
 import { Score } from 'src/score/models/score.models';
 
-@Table({ timestamps: true, tableName: 'gamesession', freezeTableName: true })
+@Table({ timestamps: true, tableName: 'gameround', freezeTableName: true })
 export class GameRound extends Model {
   @Column({
     primaryKey: true,
@@ -33,13 +34,13 @@ export class GameRound extends Model {
   @HasOne(() => Score)
   score: Score;
 
-  @Column
+  @Column({ type: DataType.STRING(10000) })
   proposals: string;
 
-  @Column({defaultValue: 1})
+  @Column({ defaultValue: 1 })
   round_number: number;
 
-  @Column({defaultValue: 5})
+  @Column({ defaultValue: 5 })
   number_of_proposals: number;
 
   @Column

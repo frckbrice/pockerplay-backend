@@ -6,7 +6,7 @@ import { Guess } from './models/guess.model';
 import { ChoiceModule } from 'src/choice/choice.module';
 import { ScoreModule } from 'src/score/score.module';
 
-import { GameRoundModule } from 'src/game_round/game_round.module';
+import { GameRoundModule } from 'src/gameRound/game_round.module';
 
 @Module({
   imports: [
