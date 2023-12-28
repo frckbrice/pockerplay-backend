@@ -153,4 +153,10 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const myDMs = await this.gameService.getAllMyGames(data.id);
     return this.server.to(data.gamesession_id).emit('myDM', myDMs);
   }
+
+  // @SubscribeMessage('currentGame')
+  // async keepCurrentGameSession(@MessageBody() data: { [id: string]: string }) {
+  //   console.log(data);
+  //   return this.server.to(data.gamesession_id).emit('currentGame', data);
+  // }
 }
