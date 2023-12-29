@@ -132,9 +132,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('guess sent: ', data);
     if (data.role === 'home_player') {
       const gameState = await this.gameService.handleUpdateGuess(data);
-      if (gameState.gameState === 'endofgame') {
-        const endG = await this.gameService.endGame(data.round_id);
-        this.handleEndGame(client, { gamesession_id: data.gamesession_id });
+      if (gameState?.gameState === 'endofgame') {
+        const endG = await this.gameService.endGame(data?.round_id);
+        this.handleEndGame(client, { gamesession_id: data?.gamesession_id });
         return this.server.to(data.gamesession_id).emit('endGame', {
           guess: data.player_guess,
           role: data.role,
@@ -142,12 +142,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
           game: endG,
         });
       }
-    } else if (data.role === 'guess_player') {
+    } else if (data?.role === 'guess_player') {
       await this.gameService.handlecreateGuess(data);
       return this.server.to(data.gamesession_id).emit('receive_guess', {
-        guess: data.player_guess,
-        role: data.role,
-        category: data.category,
+        guess: data?.player_guess,
+        role: data?.role,
+        category: data?.category,
       });
     }
   }
