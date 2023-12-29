@@ -26,7 +26,8 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    return await this.userModel.findByPk(id);
+    if (id) return await this.userModel.findByPk(id);
+    else return null;
   }
 
   // update(id: number, updateUserDto: UpdateUserDto) {
