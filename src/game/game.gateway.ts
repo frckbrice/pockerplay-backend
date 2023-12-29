@@ -119,7 +119,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       proposals: data.proposals,
       message: data.message_hint,
       role: data.role,
-      choice: choicemade.id,
+      choice: choicemade?.id,
       category: data.category,
     });
   }
