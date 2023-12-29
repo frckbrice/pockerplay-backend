@@ -131,14 +131,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     console.log('guess sent: ', data);
     if (data.role === 'home_player') {
-      const gameState = await this.gameService.handleUpdateGuess(data);
-      if (gameState?.gameState === 'endofgame') {
+      const resutl = await this.gameService.handleUpdateGuess(data);
+      if (resutl?.gameState === 'endofgame') {
         const endG = await this.gameService.endGame(data?.round_id);
         this.handleEndGame(client, { gamesession_id: data?.gamesession_id });
         return this.server.to(data.gamesession_id).emit('endGame', {
           guess: data.player_guess,
           role: data.role,
-          gameState,
+          gameState: resutl,
           game: endG,
         });
       }
