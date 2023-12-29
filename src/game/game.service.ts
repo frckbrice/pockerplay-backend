@@ -210,7 +210,7 @@ export class GameService {
       const allGameIds = (
         await this.gameModel.findAll({
           where: {
-            home_player_id: myId,
+            home_player_id: myId.toString(),
           },
         })
       ).map((data) => {
@@ -219,10 +219,9 @@ export class GameService {
       if (allGameIds.length > 0) {
         const allMyGuesses = await Promise.all(
           allGameIds.map(async (id) => {
-            if (id) {
               const user = await this.userService.findOne(id);
               if (user) return user;
-            }
+            
           }),
         );
 
