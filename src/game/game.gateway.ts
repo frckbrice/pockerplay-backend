@@ -61,14 +61,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (gameUpdate?.existGame) {
         const notification = {
           notify: `🟢 ${player.username}`,
-          role: gameUpdate.existGame ? 'guess_player' : 'home_player',
+          // role: gameUpdate.existGame ? 'guess_player' : 'home_player',
           homePlayer: gameUpdate.homePlayer,
           guessPlayer: gameUpdate.guessPlayer,
         };
         return this.server.to(data.gamesession_id).emit('notify', notification);
       } else if (gameUpdate?.guessPlayer === 'notconnected') {
         const notification = {
-          notify: `🔴 Guess not connected`,
+          notify: `🔴 player not connected`,
           role: 'home_player',
         };
         return this.server.to(data.gamesession_id).emit('notify', notification);
@@ -113,13 +113,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('send_choice')
   async handlesendingChoice(@MessageBody() data: GameType) {
-    console.log('choices rececived: ', data);
+    console.log('choices sent: ', data);
     const choicemade = await this.gameService.handleGameData(data);
     this.server.to(data.gamesession_id).emit('receive_choice', {
       proposals: data.proposals,
       message: data.message_hint,
       role: data.role,
       choice: choicemade.id,
+      category: data.category,
     });
   }
 
@@ -128,7 +129,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: GameGuessType,
     @ConnectedSocket() client: Socket,
   ) {
-    console.log('guess rececived: ', data);
+    console.log('guess sent: ', data);
     if (data.role === 'home_player') {
       const gameState = await this.gameService.handleUpdateGuess(data);
       if (gameState.gameState === 'endofgame') {
@@ -146,6 +147,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return this.server.to(data.gamesession_id).emit('receive_guess', {
         guess: data.player_guess,
         role: data.role,
+        category: data.category,
       });
     }
   }
