@@ -216,7 +216,7 @@ export class GameService {
       ).map((data) => {
         if (data.guess_player_id) return data.guess_player_id;
       });
-      if (allGameIds.length > 0) {
+      if (allGameIds.length) {
         const allMyGuesses = await Promise.all(
           allGameIds.map(async (id) => {
             if (id) {

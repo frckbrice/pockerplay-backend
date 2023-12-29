@@ -13,10 +13,14 @@ import { CreateGameDto } from './dto/create-game.dto';
 import { Socket, Server } from 'socket.io';
 import { GameGuessType, GameType } from './interface/game.interface';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: ['http://localhost:3000', '*'],
+  },
+})
 export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly gameService: GameService) {}
-
+  private socketList: string[] = [];
   @WebSocketServer() server: Server;
   handleConnection(client: Socket): any {
     console.log(`user ${client.id} has connected`);
@@ -24,7 +28,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: Socket): any {
     client.leave(client.id);
-    console.log(`user ${client.id} disconnected`);
+    console.log(`${client.id} disconnected`);
   }
 
   @SubscribeMessage('init')
@@ -50,14 +54,18 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log(data);
     if (data && data.playerId) {
       client.join(data?.gamesession_id);
+
       const gameUpdate = await this.gameService.registerGuessPlayer(
         data?.gamesession_id,
         {
           guess_player_id: data.playerId,
         },
       );
+
       const player = await this.gameService.findOneUser(data?.playerId);
+
       console.log(gameUpdate);
+
       if (gameUpdate?.existGame) {
         const notification = {
           notify: `🟢 ${player.username}`,
@@ -65,6 +73,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
           homePlayer: gameUpdate.homePlayer,
           guessPlayer: gameUpdate.guessPlayer,
         };
+
         return this.server.to(data.gamesession_id).emit('notify', notification);
       } else if (gameUpdate?.guessPlayer === 'notconnected') {
         const notification = {
@@ -92,7 +101,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const player = await this.gameService.findOneUser(data.player_id);
     this.server
       .to(data.gamesession_id)
-      .emit('disconnected', `🔴 ${data?.player} disconnected`);
+      .emit('disconnect', `🔴 ${data?.player} disconnected`);
     this.handleDisconnect(client);
     console.log(`The user  ${player.username} has disconnected`);
   }
@@ -119,7 +128,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       proposals: data.proposals,
       message: data.message_hint,
       role: data.role,
-      choice: choicemade.id,
+      choice: choicemade?.id,
       category: data.category,
     });
   }
@@ -132,9 +141,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('guess sent: ', data);
     if (data.role === 'home_player') {
       const resutl = await this.gameService.handleUpdateGuess(data);
+
       if (resutl?.gameState === 'endofgame') {
         const endG = await this.gameService.endGame(data?.round_id);
+
         this.handleEndGame(client, { gamesession_id: data?.gamesession_id });
+
         return this.server.to(data.gamesession_id).emit('endGame', {
           guess: data.player_guess,
           role: data.role,
@@ -156,8 +168,11 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async getAllmyDM(
     @MessageBody() data: { id: string; gamesession_id: string },
   ) {
-    const myDMs = await this.gameService.getAllMyGames(data.id);
-    return this.server.to(data.gamesession_id).emit('myDM', myDMs);
+    console.log(data);
+    if (data.id && data.gamesession_id) {
+      const myDMs = await this.gameService.getAllMyGames(data.id);
+      return this.server.to(data.gamesession_id).emit('myDM', myDMs);
+    }
   }
 
   @SubscribeMessage('currentGame')
