@@ -217,8 +217,10 @@ export class GameService {
       if (allGameIds.length > 0) {
         const allMyGuesses = await Promise.all(
           allGameIds.map(async (id) => {
-            const user = await this.userService.findOne(id);
-            if (user) return user;
+            if (id) {
+              const user = await this.userService.findOne(id);
+              if (user) return user;
+            }
           }),
         );
 

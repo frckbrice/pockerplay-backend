@@ -61,14 +61,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (gameUpdate?.existGame) {
         const notification = {
           notify: `🟢 ${player.username}`,
-          role: gameUpdate.existGame ? 'guess_player' : 'home_player',
+          // role: gameUpdate.existGame ? 'guess_player' : 'home_player',
           homePlayer: gameUpdate.homePlayer,
           guessPlayer: gameUpdate.guessPlayer,
         };
         return this.server.to(data.gamesession_id).emit('notify', notification);
       } else if (gameUpdate?.guessPlayer === 'notconnected') {
         const notification = {
-          notify: `🔴 Guess not connected`,
+          notify: `🔴 player not connected`,
           role: 'home_player',
         };
         return this.server.to(data.gamesession_id).emit('notify', notification);
@@ -120,6 +120,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       message: data.message_hint,
       role: data.role,
       choice: choicemade.id,
+      category: data.category,
     });
   }
 
@@ -146,6 +147,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return this.server.to(data.gamesession_id).emit('receive_guess', {
         guess: data.player_guess,
         role: data.role,
+        category: data.category,
       });
     }
   }

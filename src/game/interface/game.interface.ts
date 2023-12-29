@@ -7,6 +7,7 @@ export interface GameType {
   proposals: string;
   player_id: string;
   role?: string;
+  category?: string;
 }
 
 export interface GameGuessType {
@@ -16,4 +17,5 @@ export interface GameGuessType {
   player_id?: string;
   role?: string;
   gamesession_id?: string;
+  category?: string;
 }
