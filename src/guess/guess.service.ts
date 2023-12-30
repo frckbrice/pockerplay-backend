@@ -22,7 +22,7 @@ export class GuessService {
     try {
       const existGuess = await this.guessModel.findOne({
         where: {
-          round_id: createGuessDto.round_id,
+        //  round_id: createGuessDto.round_id,
           choice_id: createGuessDto.choice_id,
         },
       });
@@ -142,7 +142,7 @@ export class GuessService {
             checkGuess.choice_id = choice.id;
             checkGuess.guess_player_guess = updateGuessDto.player_guess;
             checkGuess.guess_player_id = updateGuessDto.player_id;
-            checkGuess.round_id = updateGuessDto.round_id;
+           // checkGuess.round_id = updateGuessDto.round_id;
             checkGuess.guess_guess_isCorrect =
               updateGuessDto.player_guess === choice.home_player_choice;
           }
