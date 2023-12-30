@@ -152,30 +152,10 @@ export class GameService {
     }
   }
 
-  async handleGameData(data: GameType) {
-    if (data.role === 'home_player') {
-      const homeValues = {
-        home_player_id: data.player_id,
-        home_player_choice: data.player_choice,
-        round_id: data.round.id,
-        home_message_hint: data.message_hint,
-        proposals: data.proposals,
-      };
-      return await this.choiceService.create(homeValues);
-    } else if (data.role === 'guess_player' && data.choice_id) {
-      const homeValues = {
-        guess_player_id: data.player_id,
-        guess_player_choice: data.player_choice,
-        round_id: data.round.id,
-        guess_message_hint: data.message_hint,
-        proposals: data.proposals,
-      };
-      return await this.choiceService.update(data.choice_id, homeValues);
-    }
-    // } else {
-    //   console.log(' no game session id');
-    //   throw new NotFoundException('No game session id');
-    // }
+  async handleGameData(data: any) {
+    console.log('data inside handleGameData function', data);
+
+    return await this.choiceService.create(data);
   }
 
   async handleUpdateAndCreateGuess(data: any) {
