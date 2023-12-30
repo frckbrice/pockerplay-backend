@@ -36,7 +36,8 @@ export class GuessService {
           guess_player_isCorrect: newGuess.guess_guess_isCorrect,
         });
 
-      return await newGuess.save();
+      const newChoice = await newGuess.save();
+      if(newChoice) return newChoice;
     }
   }
 
@@ -71,13 +72,8 @@ export class GuessService {
           home_player_isCorrect: checkGuess.home_guess_isCorrect,
         });
 
-      const updatedGuess = await checkGuess.save();
-      const roundScore = await this.getScore(updatedGuess.round_id);
-      const roundNumber = await this.checkGameRoundState(updatedGuess.round_id);
-      //check game state
-      if (roundNumber === 5) return {gameState: "END", roundScore};
-      else return {gameState: "continue",roundScore}
-    }
+    return  await checkGuess.save();
+  }
   }
 
   checkGameRoundState(roundId: string) {
