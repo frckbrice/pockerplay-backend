@@ -164,16 +164,16 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  @SubscribeMessage('myDM')
-  async getAllmyDM(
-    @MessageBody() data: { id: string; gamesession_id: string },
-  ) {
-    console.log(data);
-    if (data.id && data.gamesession_id) {
-      const myDMs = await this.gameService.getAllMyGames(data.id);
-      return this.server.to(data.gamesession_id).emit('myDM', myDMs);
-    }
-  }
+  // @SubscribeMessage('myDM')
+  // async getAllmyDM(
+  //   @MessageBody() data: { id: string; gamesession_id: string },
+  // ) {
+  //   console.log(data);
+  //   if (data.id && data.gamesession_id) {
+  //     const myDMs = await this.gameService.getAllMyGames(data.id);
+  //     return this.server.to(data.gamesession_id).emit('myDM', myDMs);
+  //   }
+  // }
 
   @SubscribeMessage('currentGame')
   async keepCurrentGameSession(@MessageBody() data: { [id: string]: string }) {
