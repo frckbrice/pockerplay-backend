@@ -64,14 +64,14 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (gameUpdate?.existGame) {
         const notification = {
           notify: `🟢 ${player.username}`,
-          role: gameUpdate.existGame ? 'guess_player' : 'home_player',
+          // role: gameUpdate.existGame ? 'guess_player' : 'home_player',
           homePlayer: gameUpdate.homePlayer,
           guessPlayer: gameUpdate.guessPlayer,
         };
         return this.server.to(data.gamesession_id).emit('notify', notification);
       } else if (gameUpdate?.guessPlayer === 'notconnected') {
         const notification = {
-          notify: `🔴 Guess not connected`,
+          notify: `🔴 player not connected`,
           role: 'home_player',
         };
         return this.server.to(data.gamesession_id).emit('notify', notification);
@@ -116,7 +116,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('send_choice')
   async handlesendingChoice(@MessageBody() data: GameType) {
+
     console.log('choice data received', data);
+
     const choicemade = await this.gameService.handleGameData(data);
     this.server.to(data.gamesession_id).emit('receive_choice', {
       proposals: data.proposals,
@@ -124,7 +126,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
       role: data.role,
       choice: choicemade?.id,
       category: data.category,
+
       round: data.round,
+
     });
   }
 
@@ -133,6 +137,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: GameGuessType,
     @ConnectedSocket() client: Socket,
   ) {
+
     console.log('guess data received', data);
 
     const updateGuess = await this.gameService.handleUpdateAndCreateGuess(data);
@@ -163,7 +168,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('myDM')
-  async getAllmyDM(@MessageBody() data: { [id: string]: string }) {
+  async getAllmyDM(
+    @MessageBody() data: { id: string; gamesession_id: string },
+  ) {
     const myDMs = await this.gameService.getAllMyGames(data.id);
     return this.server.to(data.gamesession_id).emit('myDM', myDMs);
   }

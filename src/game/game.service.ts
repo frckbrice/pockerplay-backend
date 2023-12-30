@@ -213,7 +213,7 @@ export class GameService {
   //   }
   // }
 
-   async getAllMyGames(myId: string) {
+  async getAllMyGames(myId: string) {
     console.log(' in getAllMyGames id is:  ', myId);
     if (myId) {
       const allGameIds = (
@@ -236,6 +236,7 @@ export class GameService {
       }
     } else return [];
   }
+
 
   async checkGameStatus(round_id: string) {
    

@@ -49,6 +49,7 @@ export class GuessService {
     return `This action returns a #${id} guess`;
   }
 
+ 
   async update(id: string, updateGuessDto: any) {
     const checkGuess = await this.guessModel.findOne({
       where: {
