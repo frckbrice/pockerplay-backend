@@ -84,6 +84,6 @@ export class GameRoundService {
   async getRoundNumber(id: string) {
     const round = await this.gameroundModel.findByPk(id);
 
-    return round ? round.round_number : 1;
+    return round;
   }
 }

@@ -157,20 +157,20 @@ export class GameService {
       const homeValues = {
         home_player_id: data.player_id,
         home_player_choice: data.player_choice,
-        round_id: data.round_id,
+        round_id: data.round.id,
         home_message_hint: data.message_hint,
         proposals: data.proposals,
       };
       return await this.choiceService.create(homeValues);
-    } else if (data.role === 'guess_player') {
+    } else if (data.role === 'guess_player' && data.choice_id) {
       const homeValues = {
         guess_player_id: data.player_id,
         guess_player_choice: data.player_choice,
-        round_id: data.round_id,
+        round_id: data.round.id,
         guess_message_hint: data.message_hint,
         proposals: data.proposals,
       };
-      return await this.choiceService.update(data.id, homeValues);
+      return await this.choiceService.update(data.choice_id, homeValues);
     }
     // } else {
     //   console.log(' no game session id');
@@ -178,8 +178,8 @@ export class GameService {
     // }
   }
 
-  async handleUpdateGuess(data: GameGuessType) {
-    if (data.role === 'home_player') {
+  async handleUpdateAndCreateGuess(data: any) {
+    if (!data.proposals) {
       const homeGuesses = {
         choice_id: data.choice_id,
         home_player_guess: data.player_guess,
@@ -188,11 +188,7 @@ export class GameService {
       };
 
       return await this.guessService.update(data.choice_id, homeGuesses);
-    }
-  }
-
-  async handlecreateGuess(data: GameGuessType) {
-    if (data.role === 'guess_player') {
+    } else if (data.proposals && data.proposals.length) {
       const guessGuesses = {
         choice_id: data.choice_id,
         guess_player_guess: data.player_guess,
@@ -203,6 +199,19 @@ export class GameService {
       return await this.guessService.create(guessGuesses);
     }
   }
+
+  // async handlecreateGuess(data: GameGuessType) {
+  //   if (data.role === 'guess_player') {
+  //     const guessGuesses = {
+  //       choice_id: data.choice_id,
+  //       guess_player_guess: data.player_guess,
+  //       guess_player_id: data.player_id,
+  //       round_id: data.round_id,
+  //     };
+
+  //     return await this.guessService.create(guessGuesses);
+  //   }
+  // }
 
   async getAllMyGames(myId: string) {
     console.log(' in getAllMyGames id is:  ', myId);
@@ -219,10 +228,8 @@ export class GameService {
       if (allGameIds.length) {
         const allMyGuesses = await Promise.all(
           allGameIds.map(async (id) => {
-            if (id) {
-              const user = await this.userService.findOne(id);
-              if (user) return user;
-            }
+            const user = await this.userService.findOne(id);
+            if (user) return user;
           }),
         );
 
@@ -230,5 +237,13 @@ export class GameService {
         else return [];
       }
     } else return [];
+  }
+
+  async checkGameStatus(round_id: string) {
+    return await this.roundService.getRoundNumber(round_id);
+  }
+
+  async checkroundScore(round_id: string) {
+    return await this.guessService.getScore(round_id);
   }
 }
