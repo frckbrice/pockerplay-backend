@@ -40,10 +40,10 @@ export class GuessService {
           console.log('existing choice: ', choice);
           if (createGuessDto.role === 'home_player') {
             const newGuess = new this.guessModel({
-              choice_id: createGuessDto.choice_id,
-              home_player_guess: createGuessDto.player_guess,
-              home_player_id: createGuessDto.player_id,
-              round_id: createGuessDto.round_id,
+              choice_id: createGuessDto?.choice_id,
+              home_player_guess: createGuessDto?.player_guess,
+              home_player_id: createGuessDto?.player_id,
+              round_id: createGuessDto?.round_id,
               home_guess_isCorrect:
                 createGuessDto.player_guess === choice.guess_player_choice,
               gameSession_id: createGuessDto.gamesession_id,
@@ -51,9 +51,9 @@ export class GuessService {
 
             console.log(newGuess);
 
-            if (newGuess.home_guess_isCorrect) {
-              const score = await this.scoreService.update(newGuess.round_id, {
-                home_player_isCorrect: newGuess.home_guess_isCorrect,
+            if (newGuess?.home_guess_isCorrect) {
+              const score = await this.scoreService.update(newGuess?.round_id, {
+                home_player_isCorrect: newGuess?.home_guess_isCorrect,
               });
               console.log('score: ', score);
             }
@@ -61,20 +61,20 @@ export class GuessService {
             const newChoice = await newGuess.save();
             console.log('new choice created: ', newChoice);
             if (newChoice) return newChoice;
-          } else if (createGuessDto.role === 'guess_player') {
+          } else if (createGuessDto?.role === 'guess_player') {
             const newGuess = new this.guessModel({
-              choice_id: createGuessDto.choice_id,
-              guess_player_guess: createGuessDto.player_guess,
-              guess_player_id: createGuessDto.player_id,
-              round_id: createGuessDto.round_id,
+              choice_id: createGuessDto?.choice_id,
+              guess_player_guess: createGuessDto?.player_guess,
+              guess_player_id: createGuessDto?.player_id,
+              round_id: createGuessDto?.round_id,
               guess_guess_isCorrect:
-                createGuessDto.player_guess === choice.home_player_choice,
-              gameSession_id: createGuessDto.gamesession_id,
+                createGuessDto?.player_guess === choice?.home_player_choice,
+              gameSession_id: createGuessDto?.gamesession_id,
             });
 
-            if (newGuess.guess_guess_isCorrect) {
-              const score = await this.scoreService.update(newGuess.round_id, {
-                guess_player_isCorrect: newGuess.guess_guess_isCorrect,
+            if (newGuess?.guess_guess_isCorrect) {
+              const score = await this.scoreService.update(newGuess?.round_id, {
+                guess_player_isCorrect: newGuess?.guess_guess_isCorrect,
               });
               console.log('score ', score);
             }
