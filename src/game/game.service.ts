@@ -160,8 +160,13 @@ export class GameService {
 
   async handleUpdateAndCreateGuess(data: any) {
     console.log('data inside handleUpdateAndCreateGuess function', data);
-
-    return await this.guessService.create(data);
+try {
+  return await this.guessService.create(data);
+}catch(error) {
+  console.log(error)
+}
+  
+    
   }
 
   // async handlecreateGuess(data: GameGuessType) {
