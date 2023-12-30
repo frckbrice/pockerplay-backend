@@ -27,9 +27,9 @@ console.log(dbconfig);
     GameRoundModule,
     // OptionModule,
     SequelizeModule.forRoot({
-      host: 'db4free.net' , //'localhost'
-      username: 'pockerplaydb' , //'root'
-      password: 'test0123' , // 'Password123#@!'
+      host: 'db4free.net', //'localhost'
+      username: 'pockerplaydb', //'root'
+      password: 'test0123', // 'Password123#@!'
       database: 'pockerplaydb', //'pockerplay_db'
       synchronize: true,
       retryDelay: 2000,
