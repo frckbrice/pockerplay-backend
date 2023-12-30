@@ -9,8 +9,8 @@ export class ChoiceService {
     try {
       const existingChoice = await this.choiceModel.findOne({
         where: {
-          home_player_id: createChoiceDto.home_player_id,
-          round_id: createChoiceDto.round_id,
+          home_player_id: createChoiceDto.player_id,
+          round_id: createChoiceDto.round.id,
         },
       });
 
@@ -68,7 +68,7 @@ export class ChoiceService {
       const existingChoice = await this.choiceModel.findOne({
         where: {
           id: id,
-          round_id: updateChoiceDto.round_id,
+          round_id: updateChoiceDto.round.id,
         },
       });
       if (existingChoice) {
