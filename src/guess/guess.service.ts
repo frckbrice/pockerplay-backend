@@ -43,10 +43,12 @@ export class GuessService {
               choice_id: createGuessDto?.choice_id,
               home_player_guess: createGuessDto?.player_guess,
               home_player_id: createGuessDto?.player_id,
-              round_id: createGuessDto?.round_id,
+             
               home_guess_isCorrect:
                 createGuessDto.player_guess === choice.guess_player_choice,
               gameSession_id: createGuessDto.gamesession_id,
+
+             //  round_id: createGuessDto?.round_id,
             });
 
             console.log(newGuess);
@@ -66,7 +68,7 @@ export class GuessService {
               choice_id: createGuessDto?.choice_id,
               guess_player_guess: createGuessDto?.player_guess,
               guess_player_id: createGuessDto?.player_id,
-              round_id: createGuessDto?.round_id,
+            //  round_id: createGuessDto?.round_id,
               guess_guess_isCorrect:
                 createGuessDto?.player_guess === choice?.home_player_choice,
               gameSession_id: createGuessDto?.gamesession_id,
@@ -108,7 +110,7 @@ export class GuessService {
       const checkGuess = await this.guessModel.findOne({
         where: {
           choice_id: id,
-          round_id: updateGuessDto.round_id,
+        //  round_id: updateGuessDto.round_id,
         },
       });
       console.log(' guess: ', checkGuess);
@@ -121,7 +123,7 @@ export class GuessService {
             checkGuess.choice_id = choice.id;
             checkGuess.home_player_guess = updateGuessDto.player_guess;
             checkGuess.home_player_id = updateGuessDto.player_id;
-            checkGuess.round_id = updateGuessDto.round_id;
+           // checkGuess.round_id = updateGuessDto.round_id;
             checkGuess.home_guess_isCorrect =
               updateGuessDto.player_guess === choice.guess_player_choice;
 
