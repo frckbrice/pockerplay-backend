@@ -12,7 +12,7 @@ import { CreateGameDto } from './dto/create-game.dto';
 import { Socket, Server } from 'socket.io';
 import { GameGuessType, GameType } from './interface/game.interface';
 
-@WebSocketGateway(3002, {
+@WebSocketGateway({
   cors: {
     origin: ['http://localhost:3000', '*'],
     reconnect: true,
