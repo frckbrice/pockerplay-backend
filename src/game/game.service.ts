@@ -179,25 +179,9 @@ export class GameService {
   }
 
   async handleUpdateAndCreateGuess(data: any) {
-    if (!data.proposals) {
-      const homeGuesses = {
-        choice_id: data.choice_id,
-        home_player_guess: data.player_guess,
-        home_player_id: data.player_id,
-        round_id: data.round_id,
-      };
+    console.log('data inside handleUpdateAndCreateGuess function', data);
 
-      return await this.guessService.update(data.choice_id, homeGuesses);
-    }else if (data.proposals && data.proposals.length) {
-      const guessGuesses = {
-        choice_id: data.choice_id,
-        guess_player_guess: data.player_guess,
-        guess_player_id: data.player_id,
-        round_id: data.round_id,
-      };
-
-      return await this.guessService.create(guessGuesses);
-    }
+    return await this.guessService.create(data);
   }
 
   // async handlecreateGuess(data: GameGuessType) {
@@ -222,8 +206,10 @@ export class GameService {
             home_player_id: myId,
           },
         })
-      ).map((data) => data.guess_player_id);
-      if (allGameIds.length > 0) {
+      ).map((data) => {
+        if (data.guess_player_id) return data.guess_player_id;
+      });
+      if (allGameIds.length) {
         const allMyGuesses = await Promise.all(
           allGameIds.map(async (id) => {
             const user = await this.userService.findOne(id);
@@ -237,17 +223,11 @@ export class GameService {
     } else return [];
   }
 
-
   async checkGameStatus(round_id: string) {
-   
-      return await this.roundService.getRoundNumber(round_id);
-    
+    return await this.roundService.getRoundNumber(round_id);
   }
 
-
   async checkroundScore(round_id: string) {
-   
     return await this.guessService.getScore(round_id);
-  
-}
+  }
 }
