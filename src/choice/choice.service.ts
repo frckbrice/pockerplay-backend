@@ -58,12 +58,12 @@ export class ChoiceService {
       existingChoice.guess_player_id = updateChoiceDto?.guess_player_id;
       existingChoice.guess_message_hint = updateChoiceDto?.guess_message_hint;
       existingChoice.guess_player_choice = updateChoiceDto?.guess_player_choice;
-
+      
       return await existingChoice.save();
     } else {
-      console.log(' no game session id');
+      console.log(' no choice found');
       throw new NotFoundException(
-        'No existing choice for this round session id',
+        'No choice found',
       );
     }
   }
