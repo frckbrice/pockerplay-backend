@@ -15,7 +15,6 @@ import { CacheModule, CacheInterceptor } from '@nestjs/cache-manager';
 import { ScoreModule } from './score/score.module';
 import { ConfigModule } from '@nestjs/config';
 import dbconfig from './common/config';
-import { GameRound } from './gameRound/models/gameRound.model';
 
 console.log(dbconfig);
 @Module({
@@ -28,10 +27,10 @@ console.log(dbconfig);
     GameRoundModule,
     // OptionModule,
     SequelizeModule.forRoot({
-      host: 'db4free.net', //'localhost',
-      username: 'pockerplaydb', //'root',
-      password: 'test0123', //'Password123#@!',
-      database: 'pockerplaydb', //'pockerplay_db',
+      host: 'localhost', //'db4free.net'
+      username: 'root', //'pockerplaydb'
+      password: 'Password123#@!', // 'test0123',
+      database: 'pockerplay_db', //'pockerplaydb'
       synchronize: true,
       retryDelay: 2000,
       autoLoadModels: true,
