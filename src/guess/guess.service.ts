@@ -22,7 +22,7 @@ export class GuessService {
     try {
       const existGuess = await this.guessModel.findOne({
         where: {
-          round_id: createGuessDto.round_id,
+         round_id: createGuessDto.round_id,
           choice_id: createGuessDto.choice_id,
         },
       });
@@ -44,10 +44,12 @@ export class GuessService {
               choice_id: createGuessDto?.choice_id,
               home_player_guess: createGuessDto?.player_guess,
               home_player_id: createGuessDto?.player_id,
-              round_id: createGuessDto?.round_id,
+             
               home_guess_isCorrect:
                 createGuessDto.player_guess === choice.guess_player_choice,
               gameSession_id: createGuessDto.gamesession_id,
+
+               round_id: createGuessDto?.round_id,
             });
 
             console.log('inside home player: ', newGuess.dataValues);
@@ -75,7 +77,9 @@ export class GuessService {
               guess_player_guess: createGuessDto?.player_guess,
               guess_player_id: createGuessDto?.player_id,
 
+
               round_id: createGuessDto?.round_id,
+
 
               guess_guess_isCorrect:
                 createGuessDto?.player_guess === choice?.home_player_choice,
@@ -127,7 +131,7 @@ export class GuessService {
       const checkGuess = await this.guessModel.findOne({
         where: {
           choice_id: id,
-          round_id: updateGuessDto.round_id,
+         round_id: updateGuessDto.round_id,
         },
       });
       console.log(' guess: ', checkGuess.dataValues);
@@ -138,10 +142,12 @@ export class GuessService {
         if (choice) {
           console.log(' choice: ', choice.dataValues);
           if (updateGuessDto.role === 'home_player') {
+
             checkGuess.choice_id = choice?.id;
             checkGuess.home_player_guess = updateGuessDto?.player_guess;
             checkGuess.home_player_id = updateGuessDto?.player_id;
             checkGuess.round_id = updateGuessDto?.round_id;
+
             checkGuess.home_guess_isCorrect =
               updateGuessDto?.player_guess === choice?.guess_player_choice;
 
@@ -156,11 +162,13 @@ export class GuessService {
               console.log('score: ', score);
             }
           } else if (updateGuessDto.role === 'guess_player') {
+
             console.log(' choice: ', choice.dataValues);
             checkGuess.choice_id = choice?.id;
             checkGuess.guess_player_guess = updateGuessDto?.player_guess;
             checkGuess.guess_player_id = updateGuessDto?.player_id;
             checkGuess.round_id = updateGuessDto?.round_id;
+
             checkGuess.guess_guess_isCorrect =
               updateGuessDto.player_guess === choice?.home_player_choice;
           }
