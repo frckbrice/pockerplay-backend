@@ -66,13 +66,13 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
       );
 
-      const player = await this.gameService.findOneUser(data?.playerId);
+      // const player = await this.gameService.findOneUser(data?.playerId);
 
       console.log(gameUpdate);
 
       if (gameUpdate?.existGame) {
         const notification = {
-          notify: `🟢 ${player.username}`,
+          notify: `🟢 `,
           // role: gameUpdate.existGame ? 'guess_player' : 'home_player',
           homePlayer: gameUpdate.homePlayer,
           guessPlayer: gameUpdate.guessPlayer,
@@ -81,7 +81,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return this.server.to(data.gamesession_id).emit('notify', notification);
       } else if (gameUpdate?.guessPlayer === 'notconnected') {
         const notification = {
-          notify: `🔴 player not connected`,
+          notify: `🔴 `,
           role: 'home_player',
         };
         return this.server.to(data.gamesession_id).emit('notify', notification);
@@ -105,9 +105,9 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const player = await this.gameService.findOneUser(data.player_id);
     this.server
       .to(data.gamesession_id)
-      .emit('disconnect', `🔴 ${data?.player} disconnected`);
+      .emit('disconnection', `🔴 ${data?.player} disconnected`);
     this.handleDisconnect(client);
-    console.log(`The user  ${player.username} has disconnected`);
+    console.log(`The user  ${player?.username} has disconnected`);
   }
 
   @SubscribeMessage('generate')
@@ -148,41 +148,39 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('guess data received', data);
 
     const updateGuess = await this.gameService.handleUpdateAndCreateGuess(data);
-    console.log('updateGuess', updateGuess);
-    this.gameService
-      .checkGameStatus(data.round_id)
-      .then(async (status) => {
-        if (status && status.round_number === 5) {
-          try {
-            const endG = await this.gameService.endGame(data.round_id);
-            this.handleEndGame(client, { gamesession_id: data.gamesession_id });
 
-            return this.server.to(data.gamesession_id).emit('endGame', {
-              guess: data.player_guess,
-              role: data.role,
-              gameState: 'END',
-              game: endG,
-              category: data.category,
-            });
-          } catch (error) {
-            console.log('An error occurred creating endgame', error);
-          }
-        }
-        if (updateGuess) {
-          const roundScore = await this.gameService.checkroundScore(
-            updateGuess.round_id,
-          );
-          return this.server.to(data.gamesession_id).emit('receive_guess', {
+    if (updateGuess) {
+      console.log('updateGuess', updateGuess);
+      const roundScore = await this.gameService.checkroundScore(
+        data.gamesession_id,
+      );
+      console.log('in gateway, check score', roundScore);
+      this.server.to(data.gamesession_id).emit('receive_guess', {
+        guess: data.player_guess,
+        role: data.role,
+        category: data.category,
+        score: roundScore,
+      });
+
+      const gameStatus = await this.gameService.checkGameStatus(data.round_id);
+      if (gameStatus.round_number === 5) {
+        const endG = await this.gameService.endGame(updateGuess.round_id);
+        if (endG)
+          this.server.to(data.gamesession_id).emit('endGame', {
             guess: data.player_guess,
             role: data.role,
+            gameState: 'END',
+            game: endG,
             category: data.category,
-            score: roundScore,
           });
-        } else {
-          console.log('no update guess');
-        }
-      })
-      .catch((err) => console.log(err));
+
+        return this.handleEndGame(client, {
+          gamesession_id: data.gamesession_id,
+        });
+      }
+    } else {
+      console.log('no update guess');
+    }
   }
 
   @SubscribeMessage('myDM')

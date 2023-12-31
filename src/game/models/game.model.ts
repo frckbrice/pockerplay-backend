@@ -6,8 +6,10 @@ import {
   ForeignKey,
   BelongsTo,
   HasMany,
+  HasOne,
 } from 'sequelize-typescript';
 import { GameRound } from 'src/gameRound/models/gameRound.model';
+import { Score } from 'src/score/models/score.models';
 import User from 'src/users/models/user.model';
 
 @Table({ timestamps: true, tableName: 'gamesession', freezeTableName: true })
@@ -48,4 +50,7 @@ export class GameSession extends Model {
 
   @HasMany(() => GameRound)
   rounds: GameRound[];
+
+  @HasOne(() => Score)
+  score: Score;
 }

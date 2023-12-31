@@ -1,4 +1,3 @@
-import { DataTypes } from 'sequelize';
 import {
   Table,
   Model,
@@ -9,10 +8,10 @@ import {
   // UpdatedAt,
   // DeletedAt,
   BelongsTo,
-  HasOne,
+  // HasOne,
 } from 'sequelize-typescript';
 import { GameSession } from 'src/game/models/game.model';
-import { Score } from 'src/score/models/score.models';
+// import { Score } from 'src/score/models/score.models';
 
 @Table({ timestamps: true, tableName: 'gameround', freezeTableName: true })
 export class GameRound extends Model {
@@ -30,9 +29,6 @@ export class GameRound extends Model {
 
   @BelongsTo(() => GameSession)
   game: GameSession;
-
-  @HasOne(() => Score)
-  score: Score;
 
   @Column({ type: DataType.STRING(10000) })
   proposals: string;
