@@ -62,7 +62,7 @@ export class GameService {
   }
 
   async update(id: string, updateGameDto?: UpdateGameDto) {
-    // const newID = UUIDV4(id);
+   
     const existingGame = await this.gameModel.findByPk(id);
     console.log('in the update game', updateGameDto);
 
@@ -120,7 +120,7 @@ export class GameService {
         existingGame.guess_player_id,
       );
 
-      if (existingGame) {
+      if (existingGame && roundScore) {
         console.log(
           'in end game method, the score, player, game',
           roundScore,
@@ -132,18 +132,18 @@ export class GameService {
         // existingGame.home_player_score = roundScore.home_player_score;
         // existingGame.guess_player_score = roundScore.guess_player_score;
 
-        if (roundScore.home_player_score > roundScore.guess_player_score) {
-          winner = home_player.username;
+        if (roundScore?.home_player_score > roundScore?.guess_player_score) {
+          winner = home_player?.username;
         } else if (
-          roundScore.home_player_score < roundScore.guess_player_score
+          roundScore?.home_player_score < roundScore?.guess_player_score
         ) {
-          winner = guess_player.username;
+          winner = guess_player?.username;
         }
 
         const data = {
           id: round.gamesession_id,
-          home_player_score: roundScore.home_player_score,
-          guess_player_score: roundScore.guess_player_score,
+          home_player_score: roundScore?.home_player_score,
+          guess_player_score: roundScore?.guess_player_score,
           winner,
         };
         return await this.update(gamesession_id, data);
