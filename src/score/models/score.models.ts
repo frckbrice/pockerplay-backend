@@ -6,7 +6,7 @@ import {
   BelongsTo,
   ForeignKey,
 } from 'sequelize-typescript';
-import { GameRound } from 'src/gameRound/models/gameRound.model';
+import { GameSession } from 'src/game/models/game.model';
 
 @Table({
   freezeTableName: true,
@@ -23,9 +23,9 @@ export class Score extends Model {
   })
   id: string;
 
-  @ForeignKey(() => GameRound)
+  @ForeignKey(() => GameSession)
   @Column({ type: DataType.UUID })
-  round_id: string;
+  gamesession_id: string;
 
   @Column({ defaultValue: 0 })
   home_player_score: number;
@@ -33,6 +33,6 @@ export class Score extends Model {
   @Column({ defaultValue: 0 })
   guess_player_score: number;
 
-  @BelongsTo(() => GameRound)
-  round: GameRound;
+  @BelongsTo(() => GameSession)
+  gamesession: GameSession;
 }

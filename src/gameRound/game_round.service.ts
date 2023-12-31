@@ -12,38 +12,38 @@ export class GameRoundService {
   ) {}
   async createRound(createGameRoundDto: CreateGameRoundDto) {
     console.log('create round data: ', createGameRoundDto);
-
-    const { category, number_of_proposals } = createGameRoundDto;
-    const values: string[] = [];
-    if (category === 'words') {
-      for (let i = 0; i <= number_of_proposals - 1; i++) {
-        values.push(this.randomValue(randomWords));
+    try {
+      const { category, number_of_proposals } = createGameRoundDto;
+      const values: string[] = [];
+      if (category === 'words') {
+        for (let i = 0; i <= number_of_proposals - 1; i++) {
+          values.push(this.randomValue(randomWords));
+        }
       }
-    }
-    if (category === 'Images') {
-      for (let i = 0; i <= number_of_proposals - 1; i++) {
-        values.push(this.randomValue(randomimages));
+      if (category === 'Images') {
+        for (let i = 0; i <= number_of_proposals - 1; i++) {
+          values.push(this.randomValue(randomimages));
+        }
       }
-    }
-    console.log('value to return: ', values);
-    const rowToStore = new this.gameroundModel({
-      // proposals: !(values.length > 10000)
-      //   ? JSON.stringify(values)
-      //   : 'data too for this column',
-      round_number: createGameRoundDto.round_number,
-      number_of_proposals,
-      category,
-      gamesession_id: createGameRoundDto.gamesession_id,
-    });
+      console.log('value to return: ', values);
+      const rowToStore = new this.gameroundModel({
+        round_number: createGameRoundDto.round_number,
+        number_of_proposals,
+        category,
+        gamesession_id: createGameRoundDto.gamesession_id,
+      });
 
-    if (rowToStore.round_number <= 5 && rowToStore.round_number > 0) {
-      const newRound = await rowToStore.save();
-      console.log('this is round generated: ', newRound);
-      // return { ...newRound, proposals: JSON.parse(newRound.proposals) };
-      return { ...newRound, proposals: values };
-    } else {
-      console.log('only 5 rounds are allowed');
-      return null;
+      if (rowToStore.round_number <= 5 && rowToStore.round_number > 0) {
+        const newRound = await rowToStore.save();
+        console.log('this is round generated: ', newRound);
+        // return { ...newRound, proposals: JSON.parse(newRound.proposals) };
+        return { ...newRound, proposals: values };
+      } else {
+        console.log('only 5 rounds are allowed');
+        return null;
+      }
+    } catch (error) {
+      console.log('error creating round: ', error);
     }
 
     // }

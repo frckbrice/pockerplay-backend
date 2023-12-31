@@ -110,7 +110,7 @@ export class GameService {
       console.log('in end game method, the round', round);
       const { gamesession_id } = round;
       const existingGame = await this.gameModel.findByPk(gamesession_id);
-      const roundScore = await this.guessService.getScore(roundId);
+      const roundScore = await this.guessService.getScore(gamesession_id);
 
       const home_player = await this.userService.findOne(
         existingGame.home_player_id,
@@ -120,7 +120,7 @@ export class GameService {
         existingGame.guess_player_id,
       );
 
-      if (roundScore && existingGame && home_player && guess_player) {
+      if (existingGame) {
         console.log(
           'in end game method, the score, player, game',
           roundScore,
@@ -148,14 +148,18 @@ export class GameService {
         };
         return await this.update(gamesession_id, data);
       }
-      return await existingGame.save();
+      // return await existingGame.save();
     }
   }
 
   async handleGameData(data: any) {
     console.log('data inside handleGameData function', data);
 
-    return await this.choiceService.create(data);
+    try {
+      return await this.choiceService.create(data);
+    } catch (error) {
+      console.log('inside handleUpdateAndCreateGuess fct ', error);
+    }
   }
 
   async handleUpdateAndCreateGuess(data: any) {
@@ -163,7 +167,7 @@ export class GameService {
     try {
       return await this.guessService.create(data);
     } catch (error) {
-      console.log('inside handleUpdateAndCreateGuess ', error);
+      console.log('inside handleUpdateAndCreateGuess fct ', error);
     }
   }
 

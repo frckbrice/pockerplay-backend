@@ -21,4 +21,3 @@ export interface GameGuessType {
   category?: string;
   proposals?: string[];
 }
-
