@@ -129,16 +129,18 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('choice data received', data);
 
     const choicemade = await this.gameService.handleGameData(data);
-    this.server.to(data.gamesession_id).emit('receive_choice', {
-      proposals: data.proposals,
-      message: data.message_hint,
-      role: data.role,
-      choice: data.player_choice,
-      choice_id: choicemade?.id,
-      category: data.category,
+    if (choicemade)
+      this.server.to(data.gamesession_id).emit('receive_choice', {
+        proposals: data.proposals,
+        message: data.message_hint,
+        role: data.role,
+        choiceData: data.player_choice,
+        choice: choicemade?.id,
+        category: data.category,
 
-      round: data.round,
-    });
+        round: data.round,
+      });
+    else console.log('no choice created');
   }
 
   @SubscribeMessage('send_guess')
@@ -151,7 +153,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const updateGuess = await this.gameService.handleUpdateAndCreateGuess(data);
 
     if (updateGuess) {
-      console.log('updateGuess', updateGuess);
+      console.log('updated Guess data', updateGuess);
       const roundScore = await this.gameService.checkroundScore(
         data.gamesession_id,
       );
