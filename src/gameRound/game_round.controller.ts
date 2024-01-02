@@ -27,9 +27,9 @@ export class GameRoundController {
     return this.gameRoundService.createRound(createGameRoundDto);
   }
 
-  @Get()
-  findAll() {
-    return this.gameRoundService.findAll();
+  @Get(':id')
+  findAll(@Param('id') id: string) {
+    return this.gameRoundService.findAll(id);
   }
 
   @Get(':id')

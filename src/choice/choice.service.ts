@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Choice } from './models/choice.model';
+import { Guess } from 'src/guess/models/guess.model';
 
 @Injectable()
 export class ChoiceService {
@@ -25,7 +26,7 @@ export class ChoiceService {
             home_player_id: createChoiceDto.player_id,
             round_id: createChoiceDto.round.id,
           });
-
+          console.log('choice created');
           return await newChoice.save();
         } else if (createChoiceDto.role === 'guess_player') {
           const newChoice = new this.choiceModel({
@@ -34,7 +35,7 @@ export class ChoiceService {
             guess_player_id: createChoiceDto.player_id,
             round_id: createChoiceDto.round.id,
           });
-
+          console.log('choice created');
           return await newChoice.save();
         }
       }
@@ -61,6 +62,18 @@ export class ChoiceService {
     // const newID = UUIDV4(id);
     if (id) return await this.choiceModel.findByPk(id);
     else return null;
+  }
+
+  async findRoundChoice(id: string) {
+    try {
+      return await this.choiceModel.findOne({
+        where: {
+          round_id: id,
+        },
+      });
+    } catch (error) {
+      console.log('an error occurred while finding round choice', error);
+    }
   }
 
   async update(id: string, updateChoiceDto: any) {
