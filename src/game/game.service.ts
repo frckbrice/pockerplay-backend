@@ -171,19 +171,41 @@ export class GameService {
     }
   }
 
-  // async handlecreateGuess(data: GameGuessType) {
-  //   if (data.role === 'guess_player') {
-  //     const guessGuesses = {
-  //       choice_id: data.choice_id,
-  //       guess_player_guess: data.player_guess,
-  //       guess_player_id: data.player_id,
-  //       round_id: data.round_id,
-  //     };
-
-  //     return await this.guessService.create(guessGuesses);
-  //   }
-  // }
-
+  async handlecreateGuess(gamesession_id: string) {
+    try {
+      if (gamesession_id) {
+        // get all the round for this game session
+        const rounds = (await this.roundService.findAll(gamesession_id)).map(
+          (round) => round.id,
+        );
+        if (!rounds.length)
+          console.log('No games session found for this id: ' + gamesession_id);
+        else {
+          console.log('rounds: ', rounds);
+          // for each round we need the choice associated
+          const roundsChoice = rounds
+            ?.map(async (roundId) => {
+              if (roundId) {
+                const choice =
+                  await this.choiceService.findRoundChoice(roundId);
+                if (choice && choice.home_player_choice) {
+                  return choice.home_player_choice;
+                } else if (choice && choice.guess_player_choice)
+                  return choice.guess_player_choice;
+              } else return null;
+            })
+            .filter((choice) => choice !== null);
+          const roundsChoices = await Promise.all(roundsChoice);
+          if (roundsChoices.length) {
+            console.log('Round Choices: ', roundsChoices);
+            // for each choice, we need the corresponding guess
+          }
+        }
+      }
+    } catch (error) {
+      console.log('No games session found for this id: ' + error);
+    }
+  }
   async getAllMyGames(myId: string) {
     console.log(' in getAllMyGames id is:  ', myId);
     if (myId) {

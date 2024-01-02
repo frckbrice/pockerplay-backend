@@ -150,6 +150,8 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     console.log('guess data received', data);
 
+    // if(!data)
+
     const updateGuess = await this.gameService.handleUpdateAndCreateGuess(data);
 
     if (updateGuess) {

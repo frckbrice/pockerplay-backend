@@ -4,6 +4,8 @@ import { UpdateGameRoundDto } from './dto/update-game_round.dto';
 import { GameRound } from './models/gameRound.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { randomWords, randomimages } from 'utils/data';
+import { Choice } from 'src/choice/models/choice.model';
+import { Guess } from 'src/guess/models/guess.model';
 
 @Injectable()
 export class GameRoundService {
@@ -33,6 +35,9 @@ export class GameRoundService {
         gamesession_id: createGameRoundDto.gamesession_id,
       });
 
+      const rounds = await this.findAll(createGameRoundDto.gamesession_id);
+      console.log('rounds: ', rounds);
+
       if (rowToStore.round_number <= 5 && rowToStore.round_number > 0) {
         const newRound = await rowToStore.save();
         console.log('this is round generated: ', newRound);
@@ -49,8 +54,25 @@ export class GameRoundService {
     // }
   }
 
-  findAll() {
-    return `This action returns all gameRound`;
+  async findAll(id: string) {
+    const rounds = await this.gameroundModel.findAll({
+      where: {
+        gamesession_id: id,
+      },
+      order: ['createdAt DESC'],
+      include: [
+        {
+          model: Choice,
+        },
+        {
+          model: Guess,
+        },
+      ],
+    });
+    if (rounds.length) {
+      console.log(rounds);
+      return rounds;
+    }
   }
 
   async findOne(id: string) {
