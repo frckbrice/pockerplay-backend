@@ -6,6 +6,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { randomWords, randomimages } from 'utils/data';
 import { Choice } from 'src/choice/models/choice.model';
 import { Guess } from 'src/guess/models/guess.model';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class GameRoundService {
@@ -35,9 +36,6 @@ export class GameRoundService {
         gamesession_id: createGameRoundDto.gamesession_id,
       });
 
-      const rounds = await this.findAll(createGameRoundDto.gamesession_id);
-      console.log('rounds: ', rounds);
-
       if (rowToStore.round_number <= 5 && rowToStore.round_number > 0) {
         const newRound = await rowToStore.save();
         console.log('this is round generated: ', newRound);
@@ -58,20 +56,23 @@ export class GameRoundService {
     const rounds = await this.gameroundModel.findAll({
       where: {
         gamesession_id: id,
+        round_number: {
+          // [Op.in]: [1, 2, 3, 4, 5],
+          [Op.and]: {
+            [Op.gte]: 1,
+            [Op.lte]: 5,
+          },
+        },
       },
-      order: ['createdAt DESC'],
-      include: [
-        {
-          model: Choice,
-        },
-        {
-          model: Guess,
-        },
-      ],
+      order: [['gamesession_id', 'ASC']],
+      limit: 10,
     });
     if (rounds.length) {
-      console.log(rounds);
-      return rounds;
+      console.log(
+        'inside game rounds: ',
+        rounds?.map((round: any) => round.dataValues),
+      );
+      return rounds?.map((round: any) => round.dataValues);
     }
   }
 
