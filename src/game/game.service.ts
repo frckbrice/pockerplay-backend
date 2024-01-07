@@ -62,7 +62,6 @@ export class GameService {
   }
 
   async update(id: string, updateGameDto?: UpdateGameDto) {
-   
     const existingGame = await this.gameModel.findByPk(id);
     console.log('in the update game', updateGameDto);
 
@@ -137,8 +136,11 @@ export class GameService {
         } else if (
           roundScore?.home_player_score < roundScore?.guess_player_score
         ) {
-          winner = guess_player?.username;
-        }
+          winner = guess_player.username;
+        } else if (
+          roundScore.home_player_score === roundScore.guess_player_score
+        )
+          winner === null;
 
         const data = {
           id: round.gamesession_id,
@@ -173,39 +175,118 @@ export class GameService {
 
   async handlecreateGuess(gamesession_id: string) {
     try {
-      if (gamesession_id) {
-        // get all the round for this game session
-        const rounds = (await this.roundService.findAll(gamesession_id)).map(
-          (round) => round.id,
-        );
-        if (!rounds.length)
-          console.log('No games session found for this id: ' + gamesession_id);
-        else {
-          console.log('rounds: ', rounds);
-          // for each round we need the choice associated
-          const roundsChoice = rounds
-            ?.map(async (roundId) => {
-              if (roundId) {
-                const choice =
-                  await this.choiceService.findRoundChoice(roundId);
-                if (choice && choice.home_player_choice) {
-                  return choice.home_player_choice;
-                } else if (choice && choice.guess_player_choice)
-                  return choice.guess_player_choice;
+      // get all the round for this game session
+      let result = [];
+      const rounds = (await this.roundService.findAll(gamesession_id)).map(
+        (round) => round.id,
+      );
+      if (!rounds.length)
+        console.log('No games session found for this id: ', gamesession_id);
+      else {
+        console.log('round list: ', rounds);
+
+        // for each round we need the choice associated
+        const roundsChoice = rounds
+          ?.map(async (roundId) => {
+            if (roundId) {
+              const choice = await this.choiceService.findRoundChoice(roundId);
+              if (choice) {
+                if (choice.home_player_choice) {
+                  return {
+                    round_id: roundId,
+                    choice_id: choice.id,
+                    home_player_choice: choice.home_player_choice,
+                  };
+                } else if (choice.guess_player_choice) {
+                  return {
+                    round_id: roundId,
+                    choice_id: choice.id,
+                    guess_player_choice: choice.guess_player_choice,
+                  };
+                }
               } else return null;
-            })
-            .filter((choice) => choice !== null);
-          const roundsChoices = await Promise.all(roundsChoice);
-          if (roundsChoices.length) {
-            console.log('Round Choices: ', roundsChoices);
-            // for each choice, we need the corresponding guess
+            }
+          })
+          .filter((choice) => choice !== null);
+
+        const roundsChoices = await Promise.all(roundsChoice);
+
+        if (roundsChoices.length) {
+          console.log(' inside game service Round Choices: ', roundsChoices);
+          // for each choice, we need the corresponding guess
+          const choiceAndGuesses = await Promise.all(
+            roundsChoices
+              ?.filter((data) => data !== null)
+              ?.map(async (choice) => {
+                const guess = await this.guessService.findOneChoiceGuess(
+                  choice.round_id,
+                  choice.choice_id,
+                );
+
+                if (guess) {
+                  if (guess.home_player_guess) {
+                    return {
+                      ...choice,
+                      home_player_choice: '',
+                      guess_player_guess: '',
+                      guess_player_score: 0,
+                      home_player_guess: guess.home_player_guess,
+                    };
+                  } else if (guess.guess_player_guess) {
+                    return {
+                      ...choice,
+                      guess_player_choice: '',
+                      home_player_guess: '',
+                      home_player_score: 0,
+                      guess_player_guess: guess.guess_player_guess,
+                    };
+                  }
+                } else return null;
+              })
+              .filter((guess) => guess != null),
+          );
+
+          //we check the round score to add it to the result
+          const roundScore = await this.checkroundScore(gamesession_id);
+
+          //we introduice the score of each guess into the array of result
+          if (choiceAndGuesses.length && roundScore) {
+            console.log('choiceAndGuesses: ', choiceAndGuesses);
+            const returnArray = await Promise.all(
+              choiceAndGuesses
+                ?.filter((data) => data !== null)
+                .map(async (guess) => {
+                  if (guess) {
+                    if (guess.home_player_guess) {
+                      return {
+                        ...guess,
+                        home_player_score: roundScore.home_player_score,
+                      };
+                    } else if (guess.guess_player_guess) {
+                      return {
+                        ...guess,
+                        guess_player_score: roundScore.guess_player_score,
+                      };
+                    }
+                  } else return null;
+                }),
+            );
+
+            if (returnArray.length) {
+              console.log(' inside game service returnArray: ', returnArray);
+              result = [...returnArray];
+            }
           }
         }
+        //we return the result to the gameGateway
+        console.log('result: ', result);
+        return result;
       }
     } catch (error) {
       console.log('No games session found for this id: ' + error);
     }
   }
+
   async getAllMyGames(myId: string) {
     console.log(' in getAllMyGames id is:  ', myId);
     if (myId) {
@@ -236,7 +317,7 @@ export class GameService {
     return await this.roundService.getRoundNumber(round_id);
   }
 
-  async checkroundScore(round_id: string) {
-    return await this.guessService.getScore(round_id);
+  async checkroundScore(gamesession_id: string) {
+    return await this.guessService.getScore(gamesession_id);
   }
 }

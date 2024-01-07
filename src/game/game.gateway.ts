@@ -128,6 +128,12 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handlesendingChoice(@MessageBody() data: GameType) {
     console.log('choice data received', data);
 
+    this.server.to(data.gamesession_id).emit('sending', {
+      role: data.role,
+      text: 'sending ...',
+      player_id: data.player_id,
+    });
+
     const choicemade = await this.gameService.handleGameData(data);
     if (choicemade)
       this.server.to(data.gamesession_id).emit('receive_choice', {
@@ -150,14 +156,21 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     console.log('guess data received', data);
 
-    // if(!data)
+    this.server.to(data.gamesession_id).emit('sending', {
+      role: data.role,
+      text: 'sending ...',
+      player_id: data.player_id,
+    });
 
     const updateGuess = await this.gameService.handleUpdateAndCreateGuess(data);
-
+    const displayGuess = await this.gameService.handlecreateGuess(
+      data.gamesession_id,
+    );
+    console.log('displayGuess', displayGuess);
     if (updateGuess) {
       console.log('updated Guess data', updateGuess);
       const roundScore = await this.gameService.checkroundScore(
-        data.gamesession_id,
+        data?.gamesession_id,
       );
       console.log('in gateway, check score', roundScore);
       this.server.to(data.gamesession_id).emit('receive_guess', {
@@ -165,6 +178,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
         role: data.role,
         category: data.category,
         score: roundScore,
+        stats: displayGuess,
       });
 
       const gameStatus = await this.gameService.checkGameStatus(data.round_id);
@@ -179,7 +193,7 @@ export class GameGateway implements OnGatewayConnection, OnGatewayDisconnect {
             category: data.category,
           });
 
-        return this.handleEndGame(client, {
+        this.handleEndGame(client, {
           gamesession_id: data.gamesession_id,
         });
       }

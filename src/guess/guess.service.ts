@@ -117,8 +117,19 @@ export class GuessService {
     return `This action returns all guess`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} guess`;
+  async findOneChoiceGuess(round_id: string, choice_id: string) {
+    try {
+      const checkGuess = await this.guessModel.findOne({
+        where: {
+          choice_id: choice_id,
+          round_id: round_id,
+        },
+      });
+
+      if (checkGuess) return checkGuess;
+    } catch (error) {
+      console.log('error occured while retrieving guess model', error);
+    }
   }
 
   async update(id: string, updateGuessDto: any) {
@@ -198,7 +209,7 @@ export class GuessService {
     return this.roundService.getRoundNumber(roundId);
   }
 
-  async getScore(roundId: string) {
-    return await this.scoreService.findOne(roundId);
+  async getScore(gamesession_id: string) {
+    return await this.scoreService.findOne(gamesession_id);
   }
 }
