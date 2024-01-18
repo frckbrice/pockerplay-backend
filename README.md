@@ -24,7 +24,9 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+[pockerplay](http://pockerplay.vercel.app) a two player game that involve imagination. The game consiste of creation choice options, make choice (for first player) and sends those options to the second player for him to imagine the 
+choice made by the first player. After the guess is made by the second player, he alse create option, make a choice amongst those options. send to other player and he does the same thing. 
+The game has five rounds and after the fives rounds. the game publishes the result of the game and displays the winner.
 
 ## Installation
 
