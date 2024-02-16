@@ -3,7 +3,13 @@
 ## Description
 
 [pockerplay](http://pockerplay.vercel.app) is an application that permits two players to exchange realtime data.
-one player creates a set of choice options, make a choice, then to the to the second player for him to guess the choice made. If he finds, he gains one mark. if not, he gain nothing.
+
+## Play Game
+
+One player connects to app, creates a set of choice options, make his choice, then send those choice options to the second player for him to guess the choice made.
+If he finds the choice made by the first player, he gains one point. if not, he gain nothing.
+
+The game has 5 rounds. 
 
 
 ## Motivation
