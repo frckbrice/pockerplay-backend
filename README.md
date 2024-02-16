@@ -2,38 +2,78 @@
 
 ## Description
 
-[pockerplay](http://pockerplay.vercel.app) . The game consiste of creation choice options, make choice (for first player) and sends those options to the second player for him to imagine the 
-choice made by the first player. After the guess is made by the second player, he alse create option, make a choice amongst those options. send to other player and he does the same thing. 
-The game has five rounds and after the fives rounds. the game publishes the result of the game and displays the winner.
+[pockerplay](http://pockerplay.vercel.app) is an application that permits two players to exchange realtime data.
+one player creates a set of choice options, make a choice, then to the to the second player for him to guess the choice made. If he finds, he gains one mark. if not, he gain nothing.
 
-## Installation
+
+## Motivation
+the objective behind this game is to provide a fun and engaging game that can provide a break from daily stresses, offering relaxation and enjoyment.
+
+## Built With
+
+- FRONT-END:  TypeScript  NextJS v14.0.4, tailwindCss, socket.io-client, next-pwa
+
+- BACK-END: Nest.js , @nestjs/websockets, @faker-js/faker
+
+- DATABASE: MySQL, sequelize-typescript ORM
+
+### Prerequisites
+
+Knowledge about TS:
+
+- Basic data structures:
+- Arrays
+- objects
+- Functions
+- Constructors
+- dependency injection
+- sequelize ORM
+- MySQL
+
+## Clone project
+
+- To get a local copy up and running follow these simple example steps.
+- Clone this repository with `https://github.com/frckbrice/pockerplay-backend.git` using your terminal or command line.
+- Change to the project directory by entering: cd pockerplay-frontend in the terminal.
+
+## Usage
+
+- $ git clone `git@github.com:frckbrice/pockerplay-backend.git `
+- $ `cd pockerplay-frontend `
+- $ `git checkout [feature]
+
+
+## Live Site
+
+[Link](https://pockerplay.vercel.app/)
+
+## Author
+
+👤 **Franck Brice Avom**
+
+- GitHub: [@frckbrice](https://github.com/frckbrice)
+- Twitter: [@EvaristeAvom](https://twitter.com/EvaristeAvom)
+- LinkedIn: [Brice Avom](https://www.linkedin.com/in/avombrice/)
+
+## Show your support
+
+Give a ⭐️ if you like this project!
+
+## 📝 License (optional)
+
+This project is [MIT](./LICENSE) licensed.
+
+
+## Getting Started
+
+First, run the development server:
 
 ```bash
-$ npm install
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
-
-## Running the app
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Avom brice](maebrie2017@gmail.com)
-- Twitter - [@Evaristeavom](https://twitter.com/evaristeavom)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
