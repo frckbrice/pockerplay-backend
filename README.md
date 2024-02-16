@@ -2,7 +2,7 @@
 
 ## Description
 
-[pockerplay](http://pockerplay.vercel.app) is an application that permits two players to exchange realtime data.
+[pockerplay](http://pockerplay.vercel.app) is an application that permits two players to exchange choices and guesses in realtime.
 
 ## Play Game
 
